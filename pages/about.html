@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>About — Urban BEARS</title>
+
+  <link href="https://fonts.cdnfonts.com/css/the-seasons" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="../css/base.css" />
+  <link rel="stylesheet" href="../css/animations.css" />
+  <style>
+    .page-title {
+      font-family: 'The Seasons', 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(2.8rem, 6vw, 5rem);
+      letter-spacing: .06em;
+      text-align: center;
+      padding: 0 0 2.5rem;
+      margin-top: -1rem;
+    }
+    .page-content {
+      position: relative;
+      padding: 3rem 0 6rem;
+    }
+    .ps-1  { top: 4%;   left: 2%;   animation: twinkleSlow    7.2s ease-in-out 0s    infinite; }
+    .ps-2  { top: 8%;   right: 4%;  animation: twinkleFast    3.1s ease-in-out .6s   infinite; }
+    .ps-3  { top: 22%;  left: 6%;   animation: twinkleFlicker 4.7s ease-in-out 1.4s  infinite; }
+    .ps-4  { top: 18%;  right: 7%;  animation: twinkleMid     5.3s ease-in-out .2s   infinite; }
+    .ps-5  { top: 38%;  left: 1%;   animation: twinkleFast    2.8s ease-in-out 1.1s  infinite; }
+    .ps-6  { top: 35%;  right: 2%;  animation: twinkleSlow    6.5s ease-in-out 2.1s  infinite; }
+    .ps-7  { top: 55%;  left: 4%;   animation: twinkleMid     4.9s ease-in-out .8s   infinite; }
+    .ps-8  { top: 60%;  right: 5%;  animation: twinkleFlicker 3.8s ease-in-out 1.7s  infinite; }
+    .ps-9  { top: 78%;  left: 3%;   animation: twinkleSlow    8.1s ease-in-out .4s   infinite; }
+    .ps-10 { top: 82%;  right: 3%;  animation: twinkleFast    3.4s ease-in-out 2.3s  infinite; }
+    /* ── About content ── */
+    .about-rule {
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+      margin-bottom: 2.8rem;
+    }
+    .about-rule::before,
+    .about-rule::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(255,255,255,.18);
+    }
+    .about-rule-star svg { opacity: .55; }
+
+    .about-intro {
+      max-width: 52rem;
+      margin-inline: auto;
+      text-align: center;
+      margin-bottom: 5rem;
+    }
+    .about-intro h2 {
+      font-family: 'The Seasons', 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(2rem, 4.5vw, 3.2rem);
+      letter-spacing: .05em;
+      margin-bottom: 2rem;
+    }
+    .about-intro p {
+      font-size: 1.06rem;
+      line-height: 1.8;
+      opacity: .88;
+      margin-bottom: 1.6rem;
+    }
+    .about-intro p:last-of-type { margin-bottom: 0; }
+
+    .about-divider {
+      border: none;
+      border-top: 1px solid rgba(255,255,255,.1);
+      margin-bottom: 4.5rem;
+    }
+
+    .about-cta {
+      text-align: center;
+      padding: 3.5rem 2rem;
+      border: 1.5px solid rgba(255,255,255,.15);
+      border-radius: 1.5rem;
+      background: linear-gradient(135deg, rgba(255,255,255,.03) 0%, rgba(107,85,209,.07) 100%);
+    }
+    .about-cta p {
+      font-family: 'The Seasons', 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(1.3rem, 3vw, 1.9rem);
+      letter-spacing: .04em;
+      margin-bottom: 2.4rem;
+      font-style: italic;
+    }
+    .about-socials {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1rem;
+    }
+    .social-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: .55rem;
+      border: 1.5px solid rgba(255,255,255,.3);
+      border-radius: 3rem;
+      padding: .75rem 1.6rem;
+      font-family: 'Libre Baskerville', serif;
+      font-size: .9rem;
+      letter-spacing: .04em;
+      transition: background var(--transition), border-color var(--transition),
+                  transform var(--transition), box-shadow var(--transition);
+    }
+    .social-pill svg { flex-shrink: 0; opacity: .75; transition: opacity var(--transition); }
+    .social-pill:hover {
+      background: rgba(255,255,255,.08);
+      border-color: rgba(255,255,255,.6);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px rgba(255,255,255,.08);
+    }
+    .social-pill:hover svg { opacity: 1; }
+
+    @media (max-width: 36rem) {
+      .about-socials { flex-direction: column; align-items: center; }
+      .social-pill   { width: 100%; max-width: 18rem; justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="container nav-inner">
+      <a href="/" class="nav-logo">
+        <img src="../assets/images/logo/urbanbearlogo.png" alt="Urban Bears logo" class="nav-logo-img" />
+        <div class="nav-logo-text">
+          <span class="brand">URBAN BEARS</span>
+          <span class="tagline">Biomedical Engineering and Research Student Network</span>
+        </div>
+      </a>
+
+      <ul class="nav-links" id="nav-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="research.html">Research</a></li>
+        <li><a href="opportunities.html">Opportunities</a></li>
+        <li><a href="read.html">Read</a></li>
+        <li><a href="about.html">About</a></li>
+      </ul>
+
+      <a href="#" class="btn-donate">Donate</a>
+
+      <button class="nav-hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <section class="page-content">
+    <div class="page-stars" aria-hidden="true">
+      <span class="ps-1"><svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="white" stroke-width="1.5"><path d="M14 2 L15.5 12.5 L26 14 L15.5 15.5 L14 26 L12.5 15.5 L2 14 L12.5 12.5 Z"/></svg></span>
+      <span class="ps-2"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.3"><path d="M6 1 L7 5 L11 6 L7 7 L6 11 L5 7 L1 6 L5 5 Z"/></svg></span>
+      <span class="ps-3"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="white" stroke-width="1.4"><path d="M9 1 L10 8 L17 9 L10 10 L9 17 L8 10 L1 9 L8 8 Z"/></svg></span>
+      <span class="ps-4"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="1.2"><path d="M5 1 L6 4 L9 5 L6 6 L5 9 L4 6 L1 5 L4 4 Z"/></svg></span>
+      <span class="ps-5"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="white" stroke-width="1.3"><path d="M7 1 L8 6 L13 7 L8 8 L7 13 L6 8 L1 7 L6 6 Z"/></svg></span>
+      <span class="ps-6"><svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="white" stroke-width="1.5"><path d="M16 2 L18 14 L30 16 L18 18 L16 30 L14 18 L2 16 L14 14 Z"/></svg></span>
+      <span class="ps-7"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="white" stroke-width="1.4"><path d="M10 1 L11.5 8 L19 10 L11.5 12 L10 19 L8.5 12 L1 10 L8.5 8 Z"/></svg></span>
+      <span class="ps-8"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="white" stroke-width="1.3"><path d="M8 1 L9 7 L15 8 L9 9 L8 15 L7 9 L1 8 L7 7 Z"/></svg></span>
+      <span class="ps-9"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="white" stroke-width="1.4"><path d="M11 2 L12 10 L20 11 L12 12 L11 20 L10 12 L2 11 L10 10 Z"/></svg></span>
+      <span class="ps-10"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="white" stroke-width="1.3"><path d="M7 1 L8 6 L13 7 L8 8 L7 13 L6 8 L1 7 L6 6 Z"/></svg></span>
+    </div>
+    <div class="container">
+
+      <h1 class="page-title">About</h1>
+
+      <div class="about-intro reveal">
+        <div class="about-rule">
+          <span class="about-rule-star">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="white" stroke-width="1.3"><path d="M7 1 L8 6 L13 7 L8 8 L7 13 L6 8 L1 7 L6 6 Z"/></svg>
+          </span>
+        </div>
+
+        <h2>Welcome to UrbanBEARS!</h2>
+
+        <p>We are a student-led organization and an aspiring 501(c) non-profit organization aiming to increase participation and inspire the next generation of youth in the biomedical engineering and biomedical sciences. UrbanBEARS works to increase participation and expand access in underserved communities that lack valuable hands-on and interactive STEM opportunities. We strive to support all of our members by connecting them to biomedical research and engineering internships, providing volunteer opportunities, and most importantly: reaching our goal of implementing free and accessible STEM chapters in schools with interactive technologies relevant to the field.</p>
+
+        <p>UrbanBEARS is also committed to ensuring members receive the academic, career, and college success in STEM fields they deserve by fostering a community of young leaders passionate for biotechnology, healthcare, and engineering, and allowing people to discover endless opportunities to expand their STEM journey as BEARS.</p>
+      </div>
+
+      <hr class="about-divider" />
+
+      <div class="about-intro reveal">
+        <p>As a community, we hope to expand our network to encompass students all over the globe and provide them with STEM, research, and learning opportunities intended to deepen their curiosity for learning in biomedical engineering fields or research. We aspire to create leaders from all of our members so they can go out and make their own, unique, and profound impact on their communities to inspire others and pursue their dreams.</p>
+      </div>
+
+      <div class="about-cta reveal">
+        <p>Interested in taking your next step towards healthcare innovation? Join us!</p>
+        <div class="about-socials stagger">
+          <a href="https://discord.gg/6StY9cRWuf" class="social-pill" target="_blank" rel="noopener">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
+            Discord
+          </a>
+          <a href="https://tiktok.com/@urbanbearsnetwork" class="social-pill" target="_blank" rel="noopener">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.34 6.34 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.76a4.85 4.85 0 0 1-1.01-.07z"/></svg>
+            TikTok
+          </a>
+          <a href="https://instagram.com/urbanbearsnetwork" class="social-pill" target="_blank" rel="noopener">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+            Instagram
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <p>&copy; 2026 Urban BEARS &mdash; Biomedical Engineering and Research Student Network &mdash; Nonprofit Organization</p>
+    </div>
+  </footer>
+
+  <script src="../js/main.js"></script>
+</body>
+</html>

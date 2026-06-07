@@ -9,6 +9,44 @@
  */
 
 /* ── Keyframes ── */
+
+/*
+ * ── STAR SYSTEM ────────────────────────────────────────────────────
+ * Four twinkling variants. Always mix them so siblings never fire in
+ * sync — the incoherence between neighbors is what makes it read as
+ * genuine starlight rather than a looping animation.
+ *
+ * Variants
+ *   twinkleSlow    long dim period → one double-flash peak → dim again
+ *                  feels like a distant star intermittently catching light
+ *   twinkleMid     rotation-inflected, two peaks per cycle
+ *                  natural mid-tempo, good default for most stars
+ *   twinkleFast    high-contrast, rapid opacity swings
+ *                  best for tiny stars (they physically flicker more)
+ *   twinkleFlicker asymmetric multi-peak, the most erratic
+ *                  use sparingly — one or two per cluster at most
+ *
+ * Duration guide (longer = calmer):
+ *   twinkleSlow    6s – 9s
+ *   twinkleMid     4s – 6s
+ *   twinkleFast    2.5s – 3.5s
+ *   twinkleFlicker 3.5s – 5s
+ *
+ * Sizing guide (match energy to physical size):
+ *   tiny    10 – 14 px  →  twinkleFast / twinkleFlicker
+ *   small   16 – 22 px  →  twinkleMid  / twinkleFlicker
+ *   medium  24 – 32 px  →  twinkleSlow / twinkleMid
+ *   large   36 px +     →  twinkleSlow  (slow, dramatic)
+ *
+ * Stagger delays across siblings so they never peak together:
+ *   animation: twinkleSlow 7s ease-in-out 2s infinite;
+ *
+ * Container helper: .page-stars (defined in base.css)
+ * Star SVG formula: see any page's .page-stars block for
+ * copy-pasteable sizes from 10 px up to 48 px.
+ * ──────────────────────────────────────────────────────────────────
+ */
+
 @keyframes slideDown {
   from { opacity: 0; transform: translateY(-1.2rem); }
   to   { opacity: 1; transform: translateY(0); }
@@ -21,9 +59,34 @@
   from { opacity: 0; }
   to   { opacity: 1; }
 }
-@keyframes starPulse {
-  0%, 100% { transform: scale(1) rotate(0deg); opacity: .8; }
-  50%       { transform: scale(1.15) rotate(8deg); opacity: 1; }
+/* Twinkle variants — each has a distinct rhythm so stars feel independent */
+@keyframes twinkleSlow {
+  0%         { opacity: .08; transform: scale(0.72); }
+  12%        { opacity: 1;   transform: scale(1.08); }
+  24%        { opacity: .55; transform: scale(0.92); }
+  36%        { opacity: .95; transform: scale(1.04); }
+  100%       { opacity: .08; transform: scale(0.72); }
+}
+@keyframes twinkleMid {
+  0%, 100%   { opacity: .12; transform: scale(0.78) rotate(0deg); }
+  20%        { opacity: .9;  transform: scale(1.12) rotate(6deg); }
+  45%        { opacity: .3;  transform: scale(0.85) rotate(-4deg); }
+  65%        { opacity: 1;   transform: scale(1.06) rotate(3deg); }
+}
+@keyframes twinkleFast {
+  0%, 100%   { opacity: .05; transform: scale(0.65); }
+  15%        { opacity: 1;   transform: scale(1.2); }
+  30%        { opacity: .4;  transform: scale(0.9); }
+  50%        { opacity: .85; transform: scale(1.1); }
+  70%        { opacity: .15; transform: scale(0.75); }
+}
+@keyframes twinkleFlicker {
+  0%, 100%   { opacity: .2;  transform: scale(0.8)  rotate(0deg); }
+  10%        { opacity: 1;   transform: scale(1.15) rotate(5deg); }
+  18%        { opacity: .5;  transform: scale(0.88) rotate(-3deg); }
+  28%        { opacity: .95; transform: scale(1.08) rotate(4deg); }
+  50%        { opacity: .1;  transform: scale(0.7)  rotate(-6deg); }
+  70%        { opacity: .8;  transform: scale(1.05) rotate(2deg); }
 }
 
 /* ── Scroll reveal — single element ── */

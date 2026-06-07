@@ -14,9 +14,16 @@
   <link rel="stylesheet" href="../css/animations.css" />
   <style>
     .page-hero {
+      position: relative;
+      overflow: hidden;
       padding: 6rem 0 4rem;
       text-align: center;
     }
+    /* Read page stars — 4 stars, quieter and more spaced (literary feel) */
+    .ps-1 { top: 14%;      left: 4%;    animation: twinkleSlow 9s   ease-in-out 0s    infinite; }
+    .ps-2 { top: 20%;      right: 5%;   animation: twinkleMid  6.5s ease-in-out 2.5s  infinite; }
+    .ps-3 { bottom: 30%;   left: 8%;    animation: twinkleFlicker 5s ease-in-out 1.2s infinite; }
+    .ps-4 { top: 58%;      right: 9%;   animation: twinkleSlow 7.5s ease-in-out 3.8s  infinite; }
     .page-hero h1 {
       font-family: 'The Seasons', 'Cormorant Garamond', Georgia, serif;
       font-size: clamp(2.8rem, 6vw, 5rem);
@@ -52,10 +59,7 @@
   <nav>
     <div class="container nav-inner">
       <a href="/" class="nav-logo">
-        <div class="ph ph-logo">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-          <span>Logo</span>
-        </div>
+        <img src="../assets/images/logo/urbanbearlogo.png" alt="Urban Bears logo" class="nav-logo-img" />
         <div class="nav-logo-text">
           <span class="brand">URBAN BEARS</span>
           <span class="tagline">Biomedical Engineering and Research Student Network</span>
@@ -67,7 +71,7 @@
         <li><a href="research.html">Research</a></li>
         <li><a href="opportunities.html">Opportunities</a></li>
         <li><a href="read.html">Read</a></li>
-        <li><a href="resources.html">Resources</a></li>
+        <li><a href="about.html">About</a></li>
       </ul>
 
       <a href="#" class="btn-donate">Donate</a>
@@ -79,6 +83,13 @@
   </nav>
 
   <section class="page-hero">
+    <!-- Stars: see animations.css for keyframe guide, base.css for .page-stars docs -->
+    <div class="page-stars" aria-hidden="true">
+      <span class="ps-1"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="white" stroke-width="1.4"><path d="M11 2 L12 10 L20 11 L12 12 L11 20 L10 12 L2 11 L10 10 Z"/></svg></span>
+      <span class="ps-2"><svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="white" stroke-width="1.5"><path d="M14 2 L15.5 12.5 L26 14 L15.5 15.5 L14 26 L12.5 15.5 L2 14 L12.5 12.5 Z"/></svg></span>
+      <span class="ps-3"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.3"><path d="M6 1 L7 5 L11 6 L7 7 L6 11 L5 7 L1 6 L5 5 Z"/></svg></span>
+      <span class="ps-4"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="white" stroke-width="1.4"><path d="M9 1 L10 8 L17 9 L10 10 L9 17 L8 10 L1 9 L8 8 Z"/></svg></span>
+    </div>
     <div class="container">
       <h1>Read</h1>
       <p>Browse our journal of popular science articles written by students worldwide.</p>

@@ -50,6 +50,63 @@ img { display: block; max-width: 100%; }
 .section-divider { border: none; border-top: 1px solid rgba(255,255,255,.12); }
 
 /* ══════════════════════════════════════════════
+   PAGE STARS
+   Absolute-positioned star overlay. Drop it as a
+   direct child of any position:relative section;
+   it stretches to fill that section and sits
+   behind content (z-index: 0, pointer-events: none).
+
+   Usage — HTML:
+     <section class="page-hero">           ← needs position:relative
+       <div class="page-stars" aria-hidden="true">
+         <span class="ps-1">
+           <svg width="22" height="22" viewBox="0 0 22 22"
+                fill="none" stroke="white" stroke-width="1.4">
+             <path d="M11 2 L12 10 L20 11 L12 12
+                      L11 20 L10 12 L2 11 L10 10 Z"/>
+           </svg>
+         </span>
+         <!-- add more <span class="ps-N"> siblings -->
+       </div>
+       <div class="container">…</div>
+     </section>
+
+   Usage — CSS (in the page's own stylesheet or <style> block):
+     .ps-1 { top: 10%; left: 5%;   animation: twinkleSlow  7s ease-in-out 0s   infinite; }
+     .ps-2 { top: 20%; right: 8%;  animation: twinkleFast  3s ease-in-out .9s  infinite; }
+     .ps-3 { bottom: 15%; left: 4%; animation: twinkleMid  5s ease-in-out 2s   infinite; }
+
+   All four keyframes (twinkleSlow, twinkleMid, twinkleFast, twinkleFlicker)
+   and the sizing/duration guide live in animations.css.
+
+   Star SVG path formula — 4-point diamond for any size N:
+     viewBox="0 0 {N} {N}"  width="{N}"  height="{N}"
+     path: M{N/2} {N/14}
+           L{N×0.554} {N×0.446}
+           L{N×13/14} {N/2}
+           L{N×0.554} {N×0.554}
+           L{N/2} {N×13/14}
+           L{N×0.446} {N×0.554}
+           L{N/14} {N/2}
+           L{N×0.446} {N×0.446} Z
+   Pre-computed sizes (copy-paste ready):
+     10px  M5 1 L6 4 L9 5 L6 6 L5 9 L4 6 L1 5 L4 4 Z
+     12px  M6 1 L7 5 L11 6 L7 7 L6 11 L5 7 L1 6 L5 5 Z
+     14px  M7 1 L8 6 L13 7 L8 8 L7 13 L6 8 L1 7 L6 6 Z
+     16px  M8 1 L9 7 L15 8 L9 9 L8 15 L7 9 L1 8 L7 7 Z
+     18px  M9 1 L10 8 L17 9 L10 10 L9 17 L8 10 L1 9 L8 8 Z
+     20px  M10 1 L11.5 8 L19 10 L11.5 12 L10 19 L8.5 12 L1 10 L8.5 8 Z
+     22px  M11 2 L12 10 L20 11 L12 12 L11 20 L10 12 L2 11 L10 10 Z
+     26px  M13 1 L15 10 L25 13 L15 16 L13 25 L11 16 L1 13 L11 10 Z
+     28px  M14 2 L15.5 12.5 L26 14 L15.5 15.5 L14 26 L12.5 15.5 L2 14 L12.5 12.5 Z
+     32px  M16 2 L18 14 L30 16 L18 18 L16 30 L14 18 L2 16 L14 14 Z
+     40px  M20 3 L22 18 L37 20 L22 22 L20 37 L18 22 L3 20 L18 18 Z
+     48px  M24 2 L28 20 L46 24 L28 28 L24 46 L20 28 L2 24 L20 20 Z
+══════════════════════════════════════════════ */
+.page-stars           { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
+.page-stars span      { position: absolute; }
+
+/* ══════════════════════════════════════════════
    PLACEHOLDER UTILITY
    Temporary stand-in for images not yet sourced.
    Remove once real assets are in place.
@@ -89,6 +146,8 @@ img { display: block; max-width: 100%; }
    page can use them without duplication.
 ══════════════════════════════════════════════ */
 .btn-donate {
+  position: relative;
+  overflow: hidden;
   font-family: 'Libre Baskerville', serif;
   font-size: 1rem;
   font-weight: 700;
@@ -96,12 +155,25 @@ img { display: block; max-width: 100%; }
   border: 2px solid var(--white);
   border-radius: var(--radius-btn);
   letter-spacing: .04em;
-  transition: background var(--transition), color var(--transition),
+  transition: color .3s ease, border-color .3s ease,
               transform var(--transition), box-shadow var(--transition);
+  z-index: 0;
+}
+.btn-donate::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: #0b5c6e;
+  transform: translateX(-100%);
+  transition: transform .5s cubic-bezier(.4,0,.2,1);
+  z-index: -1;
+}
+.btn-donate:hover::before {
+  transform: translateX(0);
 }
 .btn-donate:hover {
-  background: var(--white);
-  color: var(--text-dark);
+  color: #ffffff;
+  border-color: #0b5c6e;
   transform: scale(1.05);
   box-shadow: 0 4px 22px rgba(255,255,255,.18);
 }
@@ -203,6 +275,7 @@ nav {
   background: var(--navy);
   border-bottom: 1px solid rgba(255,255,255,.07);
   animation: slideDown .55s cubic-bezier(.4,0,.2,1) both;
+  overflow: visible;
 }
 .nav-inner {
   display: flex;
@@ -211,7 +284,8 @@ nav {
   padding-block: 1rem;
 }
 
-.nav-logo             { display: flex; align-items: center; gap: .75rem; }
+.nav-logo             { display: flex; align-items: center; gap: 0; }
+.nav-logo-img         { width: 4.8rem; height: 4.8rem; object-fit: contain; flex-shrink: 0; margin-block: -.4rem; }
 .nav-logo-text        { display: flex; flex-direction: column; }
 .nav-logo-text .brand {
   font-family: 'The Seasons', 'Cormorant Garamond', Georgia, serif;
@@ -222,11 +296,11 @@ nav {
 }
 .nav-logo-text .tagline {
   font-family: 'Libre Baskerville', serif;
-  font-size: .52rem;
+  font-size: .75rem;
   font-style: italic;
-  opacity: .6;
+  opacity: .9;
   letter-spacing: .03em;
-  max-width: 14rem;
+  white-space: nowrap;
   line-height: 1.35;
 }
 

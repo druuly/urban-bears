@@ -1,0 +1,46 @@
+/*
+ * animations.css — Urban BEARS
+ *
+ * All @keyframe definitions and scroll-reveal utility classes (.reveal, .stagger).
+ * Linked by every page, after base.css.
+ *
+ * The IntersectionObserver in js/main.js toggles the .visible class at runtime;
+ * the actual transition values are defined here so they stay in one place.
+ */
+
+/* ── Keyframes ── */
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-1.2rem); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(2rem); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes starPulse {
+  0%, 100% { transform: scale(1) rotate(0deg); opacity: .8; }
+  50%       { transform: scale(1.15) rotate(8deg); opacity: 1; }
+}
+
+/* ── Scroll reveal — single element ── */
+.reveal {
+  opacity: 0;
+  transform: translateY(2.5rem);
+  transition: opacity .75s ease, transform .75s ease;
+}
+.reveal.visible { opacity: 1; transform: translateY(0); }
+
+/* ── Scroll reveal — staggered children ── */
+.stagger > * {
+  opacity: 0;
+  transform: translateY(2rem);
+  transition: opacity .7s ease, transform .7s ease;
+}
+.stagger.visible > *:nth-child(1) { opacity: 1; transform: none; transition-delay: 0s; }
+.stagger.visible > *:nth-child(2) { opacity: 1; transform: none; transition-delay: .14s; }
+.stagger.visible > *:nth-child(3) { opacity: 1; transform: none; transition-delay: .28s; }
+.stagger.visible > *:nth-child(4) { opacity: 1; transform: none; transition-delay: .42s; }

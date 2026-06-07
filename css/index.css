@@ -1,0 +1,273 @@
+/*
+ * index.css — Urban BEARS · Home Page
+ *
+ * Styles specific to index.html. Covers four sections unique to the home page:
+ *   1. Hero — two-column layout with star decorations, heading, and stat bar
+ *   2. Featured Articles — 3-column article card grid
+ *   3. Resources & Upcoming Events — two-column card grid
+ *   4. Mission Statement — two-column text + nav-button layout
+ *
+ * Load order: base.css → animations.css → index.css
+ * Shared components (buttons, card-box, nav, footer) are in base.css.
+ */
+
+/* ══════════════════════════════════════════════
+   HERO
+══════════════════════════════════════════════ */
+.hero { position: relative; overflow: hidden; padding-block: 4.5rem 2.5rem; }
+
+.hero-inner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  align-items: center;
+  position: relative;
+}
+
+/* Star decorations */
+.hero-stars          { position: absolute; inset: 0; pointer-events: none; }
+.hero-stars span     { position: absolute; }
+.hero-stars .s1      { top: .5rem;    left: 4rem;    animation: starPulse 6s   ease-in-out       infinite; }
+.hero-stars .s2      { top: 30%;      right: 3rem;   animation: starPulse 8s   ease-in-out 1s    infinite; opacity: .5; }
+.hero-stars .s3      { bottom: 18%;   left: 1.5rem;  animation: starPulse 7s   ease-in-out 2s    infinite; }
+.hero-stars .s4      { top: 45%;      left: 46%;     animation: starPulse 9s   ease-in-out .5s   infinite; opacity: .35; }
+.hero-stars .s5      { bottom: 0;     right: 5.5rem; animation: starPulse 6.5s ease-in-out 1.5s  infinite; }
+
+.hero-content { position: relative; z-index: 1; }
+
+.hero-heading {
+  font-family: 'The Seasons', 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(2.6rem, 4.8vw, 3.8rem);
+  font-weight: 700;
+  line-height: 1.08;
+  margin-bottom: 1.3rem;
+  animation: fadeSlideUp .9s cubic-bezier(.4,0,.2,1) .15s both;
+}
+.hero-sub {
+  font-family: 'Libre Baskerville', serif;
+  font-style: italic;
+  font-size: clamp(1rem, 1.5vw, 1.15rem);
+  opacity: .82;
+  animation: fadeSlideUp .9s cubic-bezier(.4,0,.2,1) .3s both;
+}
+
+.hero-visual {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: fadeIn 1.1s cubic-bezier(.4,0,.2,1) .25s both;
+}
+
+.hero-bar {
+  margin-top: 3.2rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  animation: fadeSlideUp .9s cubic-bezier(.4,0,.2,1) .55s both;
+}
+
+.stats-pill {
+  border: 2px solid var(--white);
+  border-radius: var(--radius-btn);
+  padding: .9rem 2rem;
+  font-family: 'Libre Baskerville', serif;
+  font-size: 1rem;
+  font-weight: 700;
+  display: flex;
+  gap: 1.8rem;
+  white-space: nowrap;
+}
+.stats-pill span::before { content: '• '; }
+
+.cta-btns { display: flex; gap: .85rem; flex-wrap: wrap; }
+
+/* ══════════════════════════════════════════════
+   FEATURED ARTICLES
+══════════════════════════════════════════════ */
+.articles-section { padding-block: 4rem 5rem; }
+
+.articles-header {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  padding-bottom: 1.4rem;
+  border-bottom: 1px solid rgba(255,255,255,.15);
+}
+.articles-header h2 {
+  font-family: 'The Seasons', 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(2.2rem, 4.2vw, 3.2rem);
+  font-weight: 700;
+  letter-spacing: .02em;
+  line-height: 1;
+}
+.articles-header .star-group { display: flex; gap: .5rem; opacity: .75; }
+
+.articles-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2.4rem;
+  margin-top: 2.5rem;
+}
+
+.article-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  cursor: pointer;
+  transition: transform var(--transition);
+}
+.article-card:hover              { transform: translateY(-5px); }
+.article-card:hover .article-img { box-shadow: 0 14px 40px rgba(0,0,0,.45); }
+
+.article-img {
+  width: 100%;
+  aspect-ratio: 4/3;
+  border-radius: .75rem;
+  overflow: hidden;
+  transition: box-shadow var(--transition);
+}
+.article-img img { width: 100%; height: 100%; object-fit: cover; }
+
+.article-title {
+  font-family: 'Libre Baskerville', serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1.45;
+}
+.article-author {
+  font-family: 'Libre Baskerville', serif;
+  font-size: .82rem;
+  opacity: .6;
+  font-style: italic;
+}
+
+/* ══════════════════════════════════════════════
+   RESOURCES & UPCOMING EVENTS
+══════════════════════════════════════════════ */
+.res-events-section  { padding-block: 3.5rem 5rem; }
+.res-events-top-star { text-align: center; margin-bottom: 2.5rem; }
+
+.res-events-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+/* Resources inner panel */
+.resources-card .resource-inner {
+  background: var(--lavender-bg);
+  border-radius: calc(var(--radius-card) - .3rem);
+  padding: 2.2rem 1.8rem;
+  color: var(--text-dark);
+  text-align: center;
+}
+.resources-card .resource-inner p {
+  font-family: 'Libre Baskerville', serif;
+  font-weight: 700;
+  font-size: 1.05rem;
+  line-height: 1.6;
+  margin-bottom: 1.6rem;
+}
+.resources-card .resource-inner .fine-print {
+  font-family: 'Libre Baskerville', serif;
+  font-style: italic;
+  font-size: .8rem;
+  font-weight: 400;
+  opacity: .72;
+  line-height: 1.6;
+}
+
+/* Events card — purple side rules */
+.events-card { position: relative; }
+.events-card::before,
+.events-card::after {
+  content: '';
+  position: absolute;
+  top: 10%; bottom: 10%;
+  width: 2.5px;
+  background: var(--purple-rule);
+  border-radius: 2px;
+}
+.events-card::before { left: -1px; }
+.events-card::after  { right: -1px; }
+
+.event-items { display: flex; flex-direction: column; gap: 1rem; }
+
+.event-item {
+  background: var(--lavender-bg);
+  border-radius: var(--radius-btn);
+  padding: 1.35rem 2rem;
+  color: var(--text-dark);
+  font-family: 'The Seasons', 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: .05em;
+  text-align: center;
+  cursor: pointer;
+  transition: background var(--transition), transform var(--transition),
+              box-shadow var(--transition);
+}
+.event-item:hover {
+  background: var(--lavender-lt);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 8px 24px rgba(107,85,209,.2);
+}
+
+/* ══════════════════════════════════════════════
+   MISSION STATEMENT
+══════════════════════════════════════════════ */
+.mission-section {
+  border-top: 2.5px solid var(--purple-rule);
+  border-bottom: 2.5px solid var(--purple-rule);
+  padding-block: 4rem;
+}
+.mission-inner {
+  display: grid;
+  grid-template-columns: 1fr .72fr;
+  gap: 3.5rem;
+  align-items: start;
+}
+
+.mission-left h2 {
+  font-family: 'The Seasons', 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(2.2rem, 4.2vw, 3.4rem);
+  font-weight: 700;
+  line-height: 1.05;
+  margin-bottom: 1.3rem;
+}
+.mission-left p {
+  font-family: 'Libre Baskerville', serif;
+  font-size: 1rem;
+  line-height: 1.8;
+  opacity: .88;
+  margin-bottom: 2.2rem;
+}
+
+.mission-right { display: flex; flex-direction: column; gap: 1rem; }
+
+/* ══════════════════════════════════════════════
+   RESPONSIVE — index-specific breakpoints
+   Nav breakpoints are in base.css.
+══════════════════════════════════════════════ */
+@media (max-width: 62rem) {
+  .articles-grid { grid-template-columns: 1fr 1fr; }
+  .articles-grid .article-card:nth-child(3) { grid-column: span 2; max-width: 24rem; }
+}
+
+@media (max-width: 52rem) {
+  .res-events-grid { grid-template-columns: 1fr; }
+  .events-card::before, .events-card::after { display: none; }
+  .mission-inner { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 48rem) {
+  .hero-inner  { grid-template-columns: 1fr; }
+  .hero-visual { order: -1; }
+  .hero-bar    { flex-direction: column; align-items: flex-start; }
+  .stats-pill  { flex-direction: column; gap: .4rem; white-space: normal; }
+  .articles-grid { grid-template-columns: 1fr; }
+  .articles-grid .article-card:nth-child(3) { grid-column: span 1; max-width: 100%; }
+}

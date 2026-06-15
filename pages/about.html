@@ -147,6 +147,15 @@
 
       <a href="#" class="btn-donate">Donate</a>
 
+      <div class="nav-auth">
+        <button class="btn-nav-signin" id="btn-signin" hidden>Sign in</button>
+        <div class="nav-user-wrap" id="nav-user-wrap" hidden>
+          <div class="nav-profile-content" id="nav-user-chip"></div>
+          <span class="nav-signout-text" aria-hidden="true">Sign out</span>
+          <button id="btn-signout" class="nav-signout-btn" aria-label="Sign out"></button>
+        </div>
+      </div>
+
       <button class="nav-hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false">
         <span></span><span></span><span></span>
       </button>
@@ -218,5 +227,6 @@
   </footer>
 
   <script src="../js/main.js"></script>
+  <script type="module" src="../js/nav-auth.js"></script>
 </body>
 </html>

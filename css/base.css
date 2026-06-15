@@ -12,6 +12,7 @@
 
 /* ─── Reset ─── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+[hidden] { display: none !important; }
 
 /* ─── Variables ─── */
 :root {
@@ -284,7 +285,7 @@ nav {
   padding-block: 1rem;
 }
 
-.nav-logo             { display: flex; align-items: center; gap: 0; }
+.nav-logo             { display: flex; align-items: center; gap: 0; margin-left: -3rem; }
 .nav-logo-img         { width: 4.8rem; height: 4.8rem; object-fit: contain; flex-shrink: 0; margin-block: -.4rem; }
 .nav-logo-text        { display: flex; flex-direction: column; }
 .nav-logo-text .brand {
@@ -346,10 +347,118 @@ footer {
 }
 
 /* ══════════════════════════════════════════════
+   NAV AUTH — sign-in button + profile chip
+══════════════════════════════════════════════ */
+.nav-auth {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.btn-nav-signin {
+  font-family: 'Libre Baskerville', serif;
+  font-size: .82rem;
+  font-weight: 700;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  padding: .6rem 1.3rem;
+  border-radius: var(--radius-btn);
+  border: 1.5px solid var(--white);
+  background: transparent;
+  color: var(--white);
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition),
+              transform var(--transition);
+}
+.btn-nav-signin:hover {
+  background: var(--white);
+  color: var(--navy);
+  transform: translateY(-2px);
+}
+.nav-user-wrap {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  padding: .3rem .9rem .3rem .35rem;
+  border: 1.5px solid var(--white);
+  border-radius: var(--radius-btn);
+  color: var(--white);
+  font-family: 'Libre Baskerville', serif;
+  font-size: .85rem;
+  cursor: pointer;
+  transition: border-color .3s ease, transform var(--transition),
+              box-shadow var(--transition);
+  z-index: 0;
+}
+.nav-user-wrap::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,.18);
+  transform: translateX(-100%);
+  transition: transform .5s cubic-bezier(.4,0,.2,1);
+  z-index: -1;
+}
+.nav-user-wrap:hover::before { transform: translateX(0); }
+.nav-user-wrap:hover {
+  transform: scale(1.04);
+  box-shadow: 0 4px 18px rgba(255,255,255,.12);
+}
+.nav-profile-content {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  transition: opacity .2s ease, transform .3s ease;
+  pointer-events: none;
+}
+.nav-user-wrap:hover .nav-profile-content {
+  opacity: 0;
+  transform: translateX(-.5rem);
+}
+.nav-profile-content img {
+  width: 1.8rem; height: 1.8rem; border-radius: 50%;
+  border: 1.5px solid var(--white);
+}
+.nav-profile-content .name { font-weight: 700; }
+.nav-profile-content .role {
+  font-size: .68rem;
+  font-style: italic;
+  opacity: .8;
+}
+.nav-signout-text {
+  position: absolute;
+  left: 50%; top: 50%;
+  transform: translate(-50%, -50%) translateX(.6rem);
+  opacity: 0;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  font-size: .8rem;
+  white-space: nowrap;
+  pointer-events: none;
+  transition: opacity .2s ease .12s, transform .3s ease .12s;
+}
+.nav-user-wrap:hover .nav-signout-text {
+  opacity: 1;
+  transform: translate(-50%, -50%) translateX(0);
+}
+.nav-signout-btn {
+  position: absolute;
+  inset: 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+/* ══════════════════════════════════════════════
    RESPONSIVE — shared / nav breakpoint
 ══════════════════════════════════════════════ */
+@media (max-width: 70rem) {
+  .btn-donate, .nav-auth { display: none; }
+}
+
 @media (max-width: 48rem) {
-  .nav-links, .btn-donate { display: none; }
+  .nav-links, .btn-donate, .nav-auth { display: none; }
   .nav-hamburger { display: block; }
   nav { position: relative; }
 

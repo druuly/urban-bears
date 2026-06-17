@@ -60,7 +60,8 @@ export async function checkAndShowProfileModal(user, app) {
       if (errorEl) errorEl.hidden = true;
 
       try {
-        const data = { firstName, lastName, schoolName, uid: user.uid, email: user.email ?? '' };
+        const digestOptIn = !!(form.digestOptIn && form.digestOptIn.checked);
+        const data = { firstName, lastName, schoolName, uid: user.uid, email: user.email ?? '', digestOptIn };
         await setDoc(ref, data, { merge: true });
         modal.hidden = true;
         modal.setAttribute('aria-hidden', 'true');

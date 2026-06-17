@@ -184,13 +184,6 @@
     }
     .section-label .see-all:hover { opacity: 1; }
 
-    /* ── Home actions (author entry point) ── */
-    .home-actions {
-      display: flex;
-      justify-content: flex-end;
-      margin-bottom: 1.4rem;
-    }
-
     /* ══ HOME 3-COLUMN GRID ══ */
     .home-grid {
       display: grid;
@@ -256,6 +249,135 @@
       font-size: .82rem;
       font-family: 'Libre Baskerville', serif;
       color: var(--white);
+    }
+
+    /* Basic mode (< 5 articles) — same structure, uniform heading sizes */
+    .home-grid.is-basic .featured-center h2,
+    .home-grid.is-basic .small-card h3 {
+      font-family: 'The Seasons', 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.2rem;
+      letter-spacing: .02em;
+      line-height: 1.3;
+      color: var(--white);
+      margin-bottom: .4rem;
+    }
+    .home-grid.is-basic .featured-center .cover { aspect-ratio: 4 / 3; }
+
+    /* ══ RECENT POSTS SECTION ══ */
+    .recent-section {
+      margin-top: 4rem;
+      padding-top: 2rem;
+      border-top: 1px solid rgba(255,255,255,.1);
+    }
+    .recent-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 1.6rem;
+    }
+    .recent-header h2 {
+      font-family: 'The Seasons', 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(1.8rem, 2.6vw, 2.3rem);
+      letter-spacing: .02em;
+      color: var(--white);
+    }
+    .recent-header .see-all {
+      font-family: 'Libre Baskerville', serif;
+      font-size: .78rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--white);
+      cursor: pointer;
+      text-decoration: underline;
+      text-underline-offset: 4px;
+    }
+    .recent-header .see-all:hover { opacity: .75; }
+
+    .recent-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr) .9fr;
+      gap: 2rem;
+      align-items: start;
+    }
+    .recent-card {
+      display: flex;
+      flex-direction: column;
+      gap: .8rem;
+      cursor: pointer;
+      transition: opacity var(--transition);
+    }
+    .recent-card:hover { opacity: .82; }
+    .recent-card .cover {
+      aspect-ratio: 4 / 3;
+      border-radius: 1rem;
+      background-size: cover;
+      background-position: center;
+      background-color: var(--navy-mid);
+    }
+    .recent-card h3 {
+      font-family: 'The Seasons', 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.35rem;
+      letter-spacing: .02em;
+      line-height: 1.25;
+      color: var(--white);
+    }
+    .recent-card .card-meta {
+      font-size: .78rem;
+      font-family: 'Libre Baskerville', serif;
+      color: var(--white);
+    }
+
+    /* Journal sidebar */
+    .journal-side {
+      display: flex;
+      flex-direction: column;
+      gap: .9rem;
+      padding-top: .2rem;
+    }
+    .journal-side .logo-row {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+    }
+    .journal-side .logo-row img {
+      width: 2.4rem;
+      height: 2.4rem;
+      object-fit: contain;
+      border-radius: .35rem;
+      background: var(--navy-mid);
+      padding: .15rem;
+    }
+    .journal-side h4 {
+      font-family: 'The Seasons', 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.35rem;
+      letter-spacing: .02em;
+      color: var(--white);
+    }
+    .journal-side p {
+      font-family: 'Libre Baskerville', serif;
+      font-size: .92rem;
+      line-height: 1.55;
+      color: var(--white);
+      opacity: .75;
+    }
+    .btn-pledge {
+      align-self: flex-start;
+      background: rgba(255,255,255,.14);
+      border: 1px solid rgba(255,255,255,.18);
+      color: var(--white);
+      font-family: 'Libre Baskerville', serif;
+      font-size: .85rem;
+      font-weight: 700;
+      letter-spacing: .04em;
+      padding: .65rem 1.2rem;
+      border-radius: var(--radius-btn);
+      cursor: pointer;
+      margin-top: .2rem;
+      transition: background var(--transition), transform var(--transition);
+    }
+    .btn-pledge:hover {
+      background: rgba(255,255,255,.22);
+      transform: translateY(-2px);
     }
 
     /* Right column — most popular list */
@@ -869,11 +991,16 @@
     @media (max-width: 62rem) {
       .home-grid { grid-template-columns: 1fr 1.4fr; }
       .home-right { display: none; }
+      .recent-grid { grid-template-columns: repeat(2, 1fr); }
+      .journal-side { grid-column: 1 / -1; flex-direction: row; align-items: center; flex-wrap: wrap; gap: 1.2rem; }
+      .journal-side p { flex: 1; min-width: 14rem; }
     }
     @media (max-width: 48rem) {
       .home-grid { grid-template-columns: 1fr; }
       .home-left { flex-direction: row; overflow-x: auto; gap: 1rem; }
       .home-left .small-card { min-width: 55vw; }
+      .recent-grid { grid-template-columns: 1fr; }
+      .journal-side { flex-direction: column; align-items: flex-start; }
       .archive-row .cover { width: 6rem; }
       .composer form, .composer .composer-header { padding-inline: 1.6rem; }
     }
@@ -1204,11 +1331,14 @@
         return;
       }
 
+      const isBasic = state.articles.length < 5;
+
       const featured = state.articles[0];
       const leftArticles = state.articles.slice(1, 3);
       const popularArticles = [...state.articles]
         .sort((a, b) => (b.likeCount || 0) - (a.likeCount || 0))
         .slice(0, 6);
+      const recentArticles = state.articles.slice(3, 6);
 
       const smallCardHtml = (a) => `
         <article class="small-card" data-id="${a.id}">
@@ -1232,12 +1362,40 @@
           <div class="thumb" ${a.coverUrl ? `style="background-image:url('${escapeHtml(a.coverUrl)}')"` : ''}></div>
         </div>`;
 
+      const recentCardHtml = (a) => `
+        <article class="recent-card" data-id="${a.id}">
+          <div class="cover" ${a.coverUrl ? `style="background-image:url('${escapeHtml(a.coverUrl)}')"` : ''}></div>
+          <h3>${escapeHtml(a.title || 'Untitled')}</h3>
+          <div class="card-byline">
+            ${a.authorPhoto ? `<img class="byline-avatar" src="${escapeHtml(a.authorPhoto)}" alt="" />` : ''}
+            <span class="byline-text">${escapeHtml(a.authorName || 'Anonymous')}${a.authorSchool ? ' · ' + escapeHtml(a.authorSchool) : ''} · ${fmtDate(a.createdAt)}</span>
+          </div>
+        </article>`;
+
+      const journalSideHtml = `
+        <aside class="journal-side">
+          <div class="logo-row">
+            <img src="/assets/images/logo/urbanbearlogo.png" alt="Urban BEARS" />
+            <h4>The BEARS Journal</h4>
+          </div>
+          <p>Inspiring the next generation of biomedical engineers and scientists.</p>
+          <button class="btn-pledge" type="button">Pledge your support</button>
+        </aside>`;
+
+      const recentSectionHtml = (!isBasic && recentArticles.length) ? `
+        <section class="recent-section">
+          <div class="recent-header">
+            <h2>Recent posts</h2>
+            <span class="see-all" data-action="see-all">See all</span>
+          </div>
+          <div class="recent-grid">
+            ${recentArticles.map(recentCardHtml).join('')}
+            ${journalSideHtml}
+          </div>
+        </section>` : '';
+
       els.homeContent.innerHTML = `
-        ${state.isAuthor ? `
-          <div class="home-actions">
-            <button class="btn-new-article" id="home-new-article">+ New Article</button>
-          </div>` : ''}
-        <div class="home-grid">
+        <div class="home-grid${isBasic ? ' is-basic' : ''}">
           <div class="home-left">
             ${leftArticles.length ? leftArticles.map(smallCardHtml).join('') : ''}
           </div>
@@ -1252,21 +1410,23 @@
             </article>
           </div>
           <div class="home-right">
-            <div class="section-label">Most Popular <span class="see-all">View all</span></div>
+            <div class="section-label">Most Popular <span class="see-all" data-action="see-all">View all</span></div>
             <div class="popular-list">
               ${popularArticles.map(popularRowHtml).join('')}
             </div>
           </div>
-        </div>`;
+        </div>
+        ${recentSectionHtml}`;
 
       els.homeContent.querySelectorAll('[data-id]').forEach(node => {
         node.addEventListener('click', () => openReader(node.dataset.id));
       });
-      els.homeContent.querySelector('.see-all')?.addEventListener('click', (e) => {
-        e.stopPropagation();
-        document.querySelector('.research-tabs [data-view="archive"]').click();
+      els.homeContent.querySelectorAll('[data-action="see-all"]').forEach(el => {
+        el.addEventListener('click', (e) => {
+          e.stopPropagation();
+          document.querySelector('.research-tabs [data-view="archive"]').click();
+        });
       });
-      els.homeContent.querySelector('#home-new-article')?.addEventListener('click', openComposer);
     };
 
     /* ════════════════════════════════════════════════════════

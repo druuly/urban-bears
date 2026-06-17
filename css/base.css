@@ -272,12 +272,12 @@ img { display: block; max-width: 100%; }
 nav {
   position: sticky;
   top: 0;
-  z-index: 100;
-  background: var(--navy-card);
-  border-bottom: 1px solid rgba(255,255,255,.12);
-  box-shadow: 0 6px 24px rgba(0,0,0,.35);
+  z-index: 1000;
+  background: var(--navy);
+  border-bottom: 1px solid rgba(255,255,255,.07);
   animation: slideDown .55s cubic-bezier(.4,0,.2,1) both;
   overflow: visible;
+  isolation: isolate;
 }
 .nav-inner {
   display: flex;
@@ -553,6 +553,53 @@ footer {
 }
 .modal-field input.is-valid {
   border-color: rgba(127, 220, 178, .55);
+}
+.modal-field-check {
+  margin-bottom: 1.2rem;
+}
+.check-label {
+  display: flex;
+  align-items: flex-start;
+  gap: .65rem;
+  cursor: pointer;
+  font-size: .82rem;
+  font-family: 'Libre Baskerville', serif;
+  color: var(--white);
+  opacity: .8;
+  line-height: 1.4;
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 400;
+}
+.check-label input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 1.1rem;
+  height: 1.1rem;
+  min-width: 1.1rem;
+  border: 1.5px solid rgba(255,255,255,.35);
+  border-radius: .28rem;
+  background: transparent;
+  margin-top: .1rem;
+  cursor: pointer;
+  transition: background var(--transition), border-color var(--transition);
+  position: relative;
+}
+.check-label input[type="checkbox"]:checked {
+  background: var(--lavender-bg);
+  border-color: var(--lavender-bg);
+}
+.check-label input[type="checkbox"]:checked::after {
+  content: '';
+  position: absolute;
+  top: .12rem;
+  left: .25rem;
+  width: .4rem;
+  height: .65rem;
+  border: 2px solid var(--navy);
+  border-top: none;
+  border-left: none;
+  transform: rotate(45deg);
 }
 
 .btn-modal-submit {

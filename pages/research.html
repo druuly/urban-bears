@@ -818,6 +818,8 @@
     .byline-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
     /* ── Crop overlay ── */
+    /* Must stack above the composer overlay (z-index 200) since it opens on top of it */
+    #crop-overlay { z-index: 250; }
     .crop-modal {
       width: min(56rem, 100%);
     }

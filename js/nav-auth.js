@@ -1,22 +1,6 @@
-import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-import {
-  getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
+import { app, auth, signIn, signOut, signInErrorMessage } from './firebase.js';
 import { checkAndShowProfileModal } from './profile-modal.js';
-
-const firebaseConfig = {
-  apiKey: "AIzaSyCubjX7XwPD9lfOh2kdBO0DRlDQSn9OZWs",
-  authDomain: "urban-bears.firebaseapp.com",
-  projectId: "urban-bears",
-  storageBucket: "urban-bears.firebasestorage.app",
-  messagingSenderId: "624423642068",
-  appId: "1:624423642068:web:78c4845d6765a9dc07ec41",
-  measurementId: "G-9W94R3112S"
-};
-
-const app    = getApps().length ? getApp() : initializeApp(firebaseConfig);
-const auth   = getAuth(app);
-const provider = new GoogleAuthProvider();
 
 const escapeHtml = (s = '') => s.replace(/[&<>"']/g, c =>
   ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -27,11 +11,15 @@ const navUserChip = document.getElementById('nav-user-chip');
 const btnSignout  = document.getElementById('btn-signout');
 
 btnSignin.addEventListener('click', async () => {
-  try { await signInWithPopup(auth, provider); }
-  catch (e) { console.error('Sign in failed', e); }
+  try { await signIn(); }
+  catch (e) {
+    console.error('Sign in failed', e);
+    const msg = signInErrorMessage(e);
+    if (msg) alert(msg);
+  }
 });
 
-btnSignout.addEventListener('click', () => signOut(auth));
+btnSignout.addEventListener('click', () => signOut());
 
 function setNavChip(photoURL, displayName) {
   navUserChip.innerHTML = `

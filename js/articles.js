@@ -2,24 +2,13 @@
    Firestore-backed CRUD for the Research journal. All article reads/writes
    should go through this module so the rest of the app stays DOM-only. */
 
-import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
 import {
-  getFirestore, collection, doc, getDoc, getDocs, addDoc, deleteDoc,
+  collection, doc, getDoc, getDocs, addDoc, deleteDoc,
   query, orderBy, limit as fbLimit, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+import { app, db } from './firebase.js';
 
-const firebaseConfig = {
-  apiKey: "AIzaSyCubjX7XwPD9lfOh2kdBO0DRlDQSn9OZWs",
-  authDomain: "urban-bears.firebaseapp.com",
-  projectId: "urban-bears",
-  storageBucket: "urban-bears.firebasestorage.app",
-  messagingSenderId: "624423642068",
-  appId: "1:624423642068:web:78c4845d6765a9dc07ec41",
-  measurementId: "G-9W94R3112S"
-};
-
-export const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
-export const db  = getFirestore(app);
+export { app, db };
 
 const COLL = 'articles';
 

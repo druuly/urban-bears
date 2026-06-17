@@ -442,15 +442,13 @@
 
   <script type="module">
     import { loadComponents } from '/js/components.js';
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-analytics.js";
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
     import {
-      getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged
-    } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
-    import {
-      getFirestore, doc, getDoc, setDoc, deleteDoc,
+      doc, getDoc, setDoc, deleteDoc,
       serverTimestamp, increment, updateDoc, onSnapshot
     } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+    import { app, auth, db, signIn, signOut, signInErrorMessage } from '/js/firebase.js';
     import { checkAndShowProfileModal } from '/js/profile-modal.js';
 
     /* Shared components (nav, footer, profile modal) must be in the DOM
@@ -458,20 +456,7 @@
     await loadComponents();
     await import('/js/main.js');
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyCubjX7XwPD9lfOh2kdBO0DRlDQSn9OZWs",
-      authDomain: "urban-bears.firebaseapp.com",
-      projectId: "urban-bears",
-      storageBucket: "urban-bears.firebasestorage.app",
-      messagingSenderId: "624423642068",
-      appId: "1:624423642068:web:78c4845d6765a9dc07ec41",
-      measurementId: "G-9W94R3112S"
-    };
-    const app = initializeApp(firebaseConfig);
     try { getAnalytics(app); } catch (e) {}
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    const provider = new GoogleAuthProvider();
 
     const state = {
       user: null,
@@ -502,10 +487,14 @@
 
     /* ── Auth ── */
     $('btn-signin').addEventListener('click', async () => {
-      try { await signInWithPopup(auth, provider); }
-      catch (e) { console.error(e); showToast('Sign in failed'); }
+      try { await signIn(); }
+      catch (e) {
+        console.error(e);
+        const msg = signInErrorMessage(e);
+        if (msg) showToast(msg);
+      }
     });
-    $('btn-signout').addEventListener('click', () => signOut(auth));
+    $('btn-signout').addEventListener('click', () => signOut());
 
     const renderAuthBar = () => {
       if (state.user) {

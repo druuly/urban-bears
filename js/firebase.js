@@ -10,13 +10,16 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
-/* `authDomain` should share the registrable domain with the live site
-   (e.g. `auth.urbanbears.com`) so browser storage partitioning doesn't
-   break sign-in on mobile Safari/Chrome. To switch:
-     1. Add the subdomain in Firebase Console → Authentication → Settings → Authorized domains
-     2. Add it in Google Cloud Console → Credentials → OAuth 2.0 client → Authorized JS origins + redirect URIs
-     3. Point DNS at Firebase Hosting and verify the cert provisions
-     4. Change `authDomain` below to the new subdomain */
+/* `authDomain` should share the registrable domain with the live site so
+   browser storage partitioning doesn't break sign-in on mobile Safari/Chrome.
+   The site is on Vercel — `*.vercel.app` is on the Public Suffix List, so
+   the only way to fix this is to:
+     1. Buy/use a custom domain (e.g. urbanbears.com → Vercel)
+     2. Point a subdomain (e.g. auth.urbanbears.com) at Firebase Hosting
+     3. Add that subdomain in Firebase Console → Auth → Settings → Authorized domains
+     4. Add it in Google Cloud Console → Credentials → OAuth client → Authorized JS origins + /__/auth/handler redirect URI
+     5. Change `authDomain` below to the new subdomain
+   Until then, mobile Safari users may hit `auth/missing-initial-state`. */
 const firebaseConfig = {
   apiKey: "AIzaSyCubjX7XwPD9lfOh2kdBO0DRlDQSn9OZWs",
   authDomain: "urban-bears.firebaseapp.com",
@@ -63,3 +66,25 @@ export async function signIn() {
 }
 
 export const signOut = () => fbSignOut(auth);
+
+/* Maps a sign-in error to a user-facing message. Returns null for benign
+   cases (user closed the popup) so callers can stay silent. */
+export function signInErrorMessage(e) {
+  const code = e?.code || e?.message;
+  switch (code) {
+    case 'IN_APP_BROWSER':
+      return 'Please open this page in Safari or Chrome to sign in.';
+    case 'auth/popup-closed-by-user':
+    case 'auth/cancelled-popup-request':
+      return null;
+    case 'auth/popup-blocked':
+      return 'Your browser blocked the sign-in popup. Allow popups and try again.';
+    case 'auth/missing-initial-state':
+    case 'auth/web-storage-unsupported':
+      return 'Sign-in is blocked by your browser. Try Safari/Chrome outside private mode, or a desktop browser.';
+    case 'auth/network-request-failed':
+      return 'Network error. Check your connection and try again.';
+    default:
+      return 'Sign in failed. Please try again.';
+  }
+}

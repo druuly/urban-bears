@@ -1171,12 +1171,11 @@
   <script type="module">
     import { loadComponents } from '/js/components.js';
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-analytics.js";
-    import {
-      getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged
-    } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
     import { doc, getDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+    import { app, auth, signIn, signOut, signInErrorMessage } from '/js/firebase.js';
     import { checkAndShowProfileModal } from '/js/profile-modal.js';
-    import { app, db, fetchArticles, publishArticle } from '/js/articles.js';
+    import { db, fetchArticles, publishArticle } from '/js/articles.js';
 
     /* Shared components (nav, footer, profile modal) must be in the DOM
        before any code below queries it. */
@@ -1184,8 +1183,6 @@
     await import('/js/main.js');
 
     try { getAnalytics(app); } catch (e) { /* analytics fails on file:// — fine */ }
-    const auth = getAuth(app);
-    const provider = new GoogleAuthProvider();
 
     /* ── Image helpers (no Storage — downscale + compress to data URL) ──
        Firestore docs cap at ~1 MiB. Keep covers ≤ ~180 KB and inline
@@ -1293,14 +1290,15 @@
     ════════════════════════════════════════════════════════ */
     els.btnSignin.addEventListener('click', async () => {
       try {
-        await signInWithPopup(auth, provider);
+        await signIn();
       } catch (e) {
         console.error(e);
-        showToast('Sign in failed');
+        const msg = signInErrorMessage(e);
+        if (msg) showToast(msg);
       }
     });
 
-    els.btnSignout.addEventListener('click', () => signOut(auth));
+    els.btnSignout.addEventListener('click', () => signOut());
 
     const renderAuthBar = () => {
       if (state.user) {

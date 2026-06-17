@@ -29,7 +29,7 @@
     /* ── Auth bar (+ New Article for authors) ── */
     .auth-bar {
       display: flex;
-      justify-content: flex-end;
+      justify-content: center;
       align-items: center;
       gap: 1rem;
       padding: .6rem 0 .2rem;
@@ -114,6 +114,7 @@
       padding: 1.8rem 0 0;
       gap: 1rem;
       position: relative;
+      z-index: 1;
     }
 
     /* ── Tabs — pill style ── */
@@ -162,6 +163,21 @@
       animation: fadeSlideUp .55s cubic-bezier(.4,0,.2,1) both;
     }
 
+    /* Home view is viewport-locked — no page scroll, no horizontal drift.
+       Scoped to .active so display:flex doesn't override .view{display:none}
+       when the Archive tab is selected. */
+    .view-home.active {
+      display: flex;
+      flex-direction: column;
+      padding-bottom: 3rem;
+    }
+    .view-home #home-content {
+      display: flex;
+      flex-direction: column;
+    }
+    /* Hide the "Recent posts" strip — Archive covers all articles */
+    .view-home .recent-section { display: none; }
+
     /* ── Section labels ── */
     .section-label {
       font-family: 'Libre Baskerville', serif;
@@ -187,13 +203,20 @@
     /* ══ HOME 3-COLUMN GRID ══ */
     .home-grid {
       display: grid;
-      grid-template-columns: 1fr 1.7fr 1fr;
+      grid-template-columns: 1fr 1fr 1fr;
       gap: 2rem;
       align-items: start;
     }
 
-    /* Left column — small stacked cards */
-    .home-left { display: flex; flex-direction: column; gap: 1.6rem; }
+    /* Left column */
+    .home-left {
+      display: flex;
+      flex-direction: column;
+      gap: 1.6rem;
+    }
+    .home-left::-webkit-scrollbar { width: 4px; }
+    .home-left::-webkit-scrollbar-track { background: transparent; }
+    .home-left::-webkit-scrollbar-thumb { background: rgba(255,255,255,.18); border-radius: 2px; }
     .small-card {
       display: flex;
       flex-direction: column;
@@ -239,11 +262,11 @@
     }
     .featured-center h2 {
       font-family: 'The Seasons', 'Cormorant Garamond', Georgia, serif;
-      font-size: clamp(1.6rem, 2.5vw, 2.2rem);
-      letter-spacing: .03em;
-      line-height: 1.2;
+      font-size: 1.15rem;
+      letter-spacing: .02em;
+      line-height: 1.3;
       color: var(--white);
-      margin-bottom: .5rem;
+      margin-bottom: .4rem;
     }
     .featured-center .card-meta {
       font-size: .82rem;
@@ -995,14 +1018,36 @@
       .journal-side { grid-column: 1 / -1; flex-direction: row; align-items: center; flex-wrap: wrap; gap: 1.2rem; }
       .journal-side p { flex: 1; min-width: 14rem; }
     }
+    /* Featured-articles heading — only shown on mobile */
+    .featured-heading { display: none; }
     @media (max-width: 48rem) {
+      .featured-heading {
+        display: block;
+        font-family: 'The Seasons', 'Cormorant Garamond', Georgia, serif;
+        font-size: 1.4rem;
+        letter-spacing: .04em;
+        color: var(--white);
+        margin-bottom: 1rem;
+      }
+      /* Lock page to vertical scroll only. Cards may scroll horizontally
+         inside their own containers, but the page itself must not. */
+      html, body { overflow-x: hidden; }
       .home-grid { grid-template-columns: 1fr; }
+      /* All cards on mobile share the same width so the layout reads
+         evenly and no card visually dominates. */
       .home-left { flex-direction: row; overflow-x: auto; gap: 1rem; }
-      .home-left .small-card { min-width: 55vw; }
+      .home-left .small-card { width: 70vw; flex: 0 0 70vw; min-width: 0; }
+      .home-left .small-card .cover { aspect-ratio: 4 / 3; }
+      .home-center { align-items: flex-start; }
+      .featured-center { width: 70vw; }
+      .featured-center .cover { aspect-ratio: 4 / 3; margin-bottom: .75rem; }
+      .featured-center h2 { font-size: 1.15rem; }
       .recent-grid { grid-template-columns: 1fr; }
       .journal-side { flex-direction: column; align-items: flex-start; }
       .archive-row .cover { width: 6rem; }
       .composer form, .composer .composer-header { padding-inline: 1.6rem; }
+      footer .container,
+      footer p { text-align: center; }
     }
     @media (max-width: 36rem) {
       .archive-row .cover { display: none; }
@@ -1400,6 +1445,7 @@
             ${leftArticles.length ? leftArticles.map(smallCardHtml).join('') : ''}
           </div>
           <div class="home-center">
+            <h2 class="featured-heading">Featured Articles</h2>
             <article class="featured-center" data-id="${featured.id}">
               <div class="cover" ${featuredCoverStyle}></div>
               <h2>${escapeHtml(featured.title || 'Untitled')}</h2>

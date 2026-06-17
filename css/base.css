@@ -349,6 +349,12 @@ footer {
 /* ══════════════════════════════════════════════
    NAV AUTH — sign-in button + profile chip
 ══════════════════════════════════════════════ */
+.nav-auth-li {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  list-style: none;
+}
 .nav-auth {
   position: relative;
   display: flex;
@@ -661,13 +667,18 @@ footer {
    RESPONSIVE — shared / nav breakpoint
 ══════════════════════════════════════════════ */
 @media (max-width: 70rem) {
-  .btn-donate, .nav-auth { display: none; }
+  .btn-donate, .nav-auth-li { display: none; }
 }
 
 @media (max-width: 48rem) {
-  .nav-links, .btn-donate, .nav-auth { display: none; }
+  .nav-links, .btn-donate { display: none; }
   .nav-hamburger { display: block; }
   nav { position: relative; }
+
+  .nav-logo { margin-left: 0; }
+  .nav-logo-img { width: 2.4rem; height: 2.4rem; margin-block: 0; }
+  .nav-logo-text .brand { font-size: .8rem; }
+  .nav-logo-text .tagline { font-size: .55rem; }
 
   .nav-links.open {
     display: flex;
@@ -678,5 +689,12 @@ footer {
     padding: 1.2rem 5%;
     gap: 1.1rem;
     border-bottom: 1px solid rgba(255,255,255,.1);
+  }
+
+  .nav-links.open .nav-auth-li {
+    display: flex;
+    margin-left: 0;
+    padding-top: .4rem;
+    border-top: 1px solid rgba(255,255,255,.1);
   }
 }

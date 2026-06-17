@@ -273,8 +273,9 @@ nav {
   position: sticky;
   top: 0;
   z-index: 100;
-  background: var(--navy);
-  border-bottom: 1px solid rgba(255,255,255,.07);
+  background: var(--navy-card);
+  border-bottom: 1px solid rgba(255,255,255,.12);
+  box-shadow: 0 6px 24px rgba(0,0,0,.35);
   animation: slideDown .55s cubic-bezier(.4,0,.2,1) both;
   overflow: visible;
 }

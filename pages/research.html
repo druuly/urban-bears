@@ -291,8 +291,8 @@
       color: var(--white);
     }
     .popular-row .thumb {
-      width: 3.8rem;
-      aspect-ratio: 1;
+      width: 4.5rem;
+      aspect-ratio: 4 / 3;
       border-radius: .6rem;
       background-size: cover;
       background-position: center;
@@ -552,7 +552,8 @@
     .cover-dropzone {
       position: relative;
       width: 100%;
-      aspect-ratio: 21 / 9;
+      max-width: 28rem;
+      aspect-ratio: 4 / 3;
       border: 1.5px dashed rgba(255,255,255,.3);
       border-radius: 1rem;
       background-size: cover;
@@ -823,6 +824,17 @@
     .crop-modal {
       width: min(56rem, 100%);
     }
+    .crop-modal .composer-header {
+      padding: 1.6rem 2.4rem 1.2rem;
+      border-bottom: 1px solid rgba(255,255,255,.12);
+    }
+    .crop-modal .composer-header h2 {
+      font-family: 'The Seasons', 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.6rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--white);
+    }
     .crop-modal .crop-body {
       padding: 1.5rem 2.4rem 2rem;
     }
@@ -840,7 +852,6 @@
       font-family: 'Libre Baskerville', serif;
       font-size: .78rem;
       color: var(--white);
-      opacity: .55;
       text-align: center;
       margin-top: .8rem;
       font-style: italic;
@@ -1442,7 +1453,7 @@
       const initCropper = () => {
         if (cropperInstance) return;
         cropperInstance = new Cropper(cropImg, {
-          aspectRatio: 21 / 9,
+          aspectRatio: 4 / 3,
           viewMode: 1,
           autoCropArea: 1,
           movable: true,

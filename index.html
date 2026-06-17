@@ -35,42 +35,7 @@
   <!-- ═══════════════════════════════════
        NAV
   ═══════════════════════════════════ -->
-  <nav>
-    <div class="container nav-inner">
-
-      <a href="/" class="nav-logo">
-        <img src="assets/images/logo/urbanbearlogo.png" alt="Urban Bears logo" class="nav-logo-img" />
-        <div class="nav-logo-text">
-          <span class="brand">URBAN BEARS</span>
-          <span class="tagline">Biomedical Engineering and Research Student Network</span>
-        </div>
-      </a>
-
-      <ul class="nav-links" id="nav-links">
-        <li><a href="/">Home</a></li>
-        <li><a href="pages/research.html">Research</a></li>
-        <li><a href="pages/opportunities.html">Opportunities</a></li>
-        <li><a href="pages/read.html">Read</a></li>
-        <li><a href="pages/about.html">About</a></li>
-      </ul>
-
-      <a href="#" class="btn-donate">Donate</a>
-
-      <div class="nav-auth">
-        <button class="btn-nav-signin" id="btn-signin" hidden>Sign in</button>
-        <div class="nav-user-wrap" id="nav-user-wrap" hidden>
-          <div class="nav-profile-content" id="nav-user-chip"></div>
-          <span class="nav-signout-text" aria-hidden="true">Sign out</span>
-          <button id="btn-signout" class="nav-signout-btn" aria-label="Sign out"></button>
-        </div>
-      </div>
-
-      <button class="nav-hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false">
-        <span></span><span></span><span></span>
-      </button>
-
-    </div>
-  </nav>
+  <div data-component="nav"></div>
 
   <!-- ═══════════════════════════════════
        HERO
@@ -135,41 +100,24 @@
         </div>
       </div>
 
-      <div class="articles-grid stagger">
+      <div class="articles-grid stagger" id="articles-grid">
 
-        <article class="article-card">
-          <!-- Replace .ph-article with <img src="assets/images/articles/..." alt="..."> -->
-          <div class="article-img">
-            <div class="ph ph-article">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-              <span>Article Image</span>
-            </div>
-          </div>
-          <h3 class="article-title">Human Adaptation to Deep-Space Radiation Beyond Low Earth Orbit: Integrated Countermeasures, Mechanisms, and Future Directions</h3>
-          <p class="article-author">Anvi Pandit, Heritage High School</p>
-        </article>
-
-        <article class="article-card">
-          <div class="article-img">
-            <div class="ph ph-article">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-              <span>Article Image</span>
-            </div>
-          </div>
-          <h3 class="article-title">The Regeneration Switch: Why Some Bodies Rebuild and Ours Don't</h3>
-          <p class="article-author">Ayesha Bilal Khan, GEMS Our Own Indian School</p>
-        </article>
-
-        <article class="article-card">
-          <div class="article-img">
-            <div class="ph ph-article">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-              <span>Article Image</span>
-            </div>
-          </div>
-          <h3 class="article-title">Why Colorectal Cancer Loves the Liver</h3>
-          <p class="article-author">Semilogo Oketola, Dr. E.P. Scarlett High School</p>
-        </article>
+        <!-- Skeleton placeholders shown while articles load -->
+        <div class="article-card article-skeleton">
+          <div class="article-img"><div class="ph ph-article"></div></div>
+          <div class="skeleton-line wide"></div>
+          <div class="skeleton-line narrow"></div>
+        </div>
+        <div class="article-card article-skeleton">
+          <div class="article-img"><div class="ph ph-article"></div></div>
+          <div class="skeleton-line wide"></div>
+          <div class="skeleton-line narrow"></div>
+        </div>
+        <div class="article-card article-skeleton">
+          <div class="article-img"><div class="ph ph-article"></div></div>
+          <div class="skeleton-line wide"></div>
+          <div class="skeleton-line narrow"></div>
+        </div>
 
       </div>
     </div>
@@ -240,14 +188,50 @@
   <!-- ═══════════════════════════════════
        FOOTER
   ═══════════════════════════════════ -->
-  <footer>
-    <div class="container">
-      <p>&copy; 2026 Urban BEARS &mdash; Biomedical Engineering and Research Student Network &mdash; Nonprofit Organization</p>
-    </div>
-  </footer>
+  <div data-component="footer"></div>
 
-  <script src="js/main.js"></script>
-  <script type="module" src="js/nav-auth.js"></script>
+  <!-- ── Profile Setup Modal ── -->
+  <div data-component="profile-modal"></div>
+
+  <script type="module">
+    import { loadComponents } from '/js/components.js';
+
+    // Critical path: components → scroll-reveal/nav → auth
+    await loadComponents();
+    await import('/js/main.js');
+    import('/js/nav-auth.js').catch(e => console.error('nav-auth failed', e));
+
+    // Articles load independently so a Firestore error never blanks the page
+    (async () => {
+      const esc = s => String(s ?? '').replace(/[&<>"']/g,
+        c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+      const phSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg><span>Article Image</span>`;
+
+      try {
+        const { fetchFeaturedArticles } = await import('/js/articles.js');
+        const articles = await fetchFeaturedArticles();
+        const grid = document.getElementById('articles-grid');
+        if (!grid || !articles.length) return;
+
+        grid.innerHTML = articles.map(a => {
+          const imgInner = a.coverUrl
+            ? `<img src="${esc(a.coverUrl)}" alt="${esc(a.title)}" loading="lazy" />`
+            : `<div class="ph ph-article">${phSvg}</div>`;
+          const author = esc(a.authorName || 'Anonymous') +
+            (a.authorSchool ? ', ' + esc(a.authorSchool) : '');
+
+          return `<a class="article-card" href="/pages/article.html?id=${esc(a.id)}">
+            <div class="article-img">${imgInner}</div>
+            <h3 class="article-title">${esc(a.title || 'Untitled')}</h3>
+            <p class="article-author">${author}</p>
+          </a>`;
+        }).join('');
+      } catch (e) {
+        console.error('Featured articles failed to load', e);
+      }
+    })();
+  </script>
 
 </body>
 </html>

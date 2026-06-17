@@ -254,40 +254,7 @@
 </head>
 <body>
 
-  <nav>
-    <div class="container nav-inner">
-      <a href="/" class="nav-logo">
-        <img src="../assets/images/logo/urbanbearlogo.png" alt="Urban Bears logo" class="nav-logo-img" />
-        <div class="nav-logo-text">
-          <span class="brand">URBAN BEARS</span>
-          <span class="tagline">Biomedical Engineering and Research Student Network</span>
-        </div>
-      </a>
-
-      <ul class="nav-links" id="nav-links">
-        <li><a href="/">Home</a></li>
-        <li><a href="research.html">Research</a></li>
-        <li><a href="opportunities.html">Opportunities</a></li>
-        <li><a href="read.html">Read</a></li>
-        <li><a href="about.html">About</a></li>
-      </ul>
-
-      <a href="#" class="btn-donate">Donate</a>
-
-      <div class="nav-auth">
-        <button class="btn-nav-signin" id="btn-signin" hidden>Sign in</button>
-        <div class="nav-user-wrap" id="nav-user-wrap" hidden>
-          <div class="nav-profile-content" id="nav-user-chip"></div>
-          <span class="nav-signout-text" aria-hidden="true">Sign out</span>
-          <button id="btn-signout" class="nav-signout-btn" aria-label="Sign out"></button>
-        </div>
-      </div>
-
-      <button class="nav-hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false">
-        <span></span><span></span><span></span>
-      </button>
-    </div>
-  </nav>
+  <div data-component="nav"></div>
 
   <section class="page-hero">
     <!-- Stars: see animations.css for keyframe guide, base.css for .page-stars docs -->
@@ -328,14 +295,18 @@
   <!-- Permission error toast -->
   <div id="delete-error" hidden>Unable to delete — you may not have permission.</div>
 
-  <footer>
-    <div class="container">
-      <p>&copy; 2026 Urban BEARS &mdash; Biomedical Engineering and Research Student Network &mdash; Nonprofit Organization</p>
-    </div>
-  </footer>
+  <div data-component="footer"></div>
 
-  <script src="../js/main.js"></script>
-  <script type="module" src="../js/nav-auth.js"></script>
-  <script type="module" src="../js/articles.js"></script>
+  <!-- ── Profile Setup Modal ── -->
+  <div data-component="profile-modal"></div>
+
+  <script type="module">
+    import { loadComponents } from '/js/components.js';
+    await loadComponents();
+    await import('/js/main.js');
+    await import('/js/nav-auth.js');
+    await import('/js/articles.js');
+  </script>
+
 </body>
 </html>

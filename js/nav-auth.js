@@ -2,6 +2,7 @@ import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebase
 import {
   getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
+import { checkAndShowProfileModal } from './profile-modal.js';
 
 const firebaseConfig = {
   apiKey: "AIzaSyCubjX7XwPD9lfOh2kdBO0DRlDQSn9OZWs",
@@ -32,14 +33,23 @@ btnSignin.addEventListener('click', async () => {
 
 btnSignout.addEventListener('click', () => signOut(auth));
 
-onAuthStateChanged(auth, (user) => {
+function setNavChip(photoURL, displayName) {
+  navUserChip.innerHTML = `
+    <img src="${escapeHtml(photoURL || '')}" alt="" />
+    <div><div class="name">${escapeHtml(displayName || 'Reader')}</div></div>
+  `;
+}
+
+onAuthStateChanged(auth, async (user) => {
   if (user) {
     btnSignin.hidden = true;
     navUserWrap.hidden = false;
-    navUserChip.innerHTML = `
-      <img src="${escapeHtml(user.photoURL || '')}" alt="" />
-      <div><div class="name">${escapeHtml(user.displayName || 'Reader')}</div></div>
-    `;
+    setNavChip(user.photoURL, user.displayName);
+
+    const profile = await checkAndShowProfileModal(user, app);
+    if (profile?.firstName) {
+      setNavChip(user.photoURL, `${profile.firstName} ${profile.lastName}`);
+    }
   } else {
     btnSignin.hidden = false;
     navUserWrap.hidden = true;

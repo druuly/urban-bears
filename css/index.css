@@ -50,7 +50,6 @@
   font-family: 'Libre Baskerville', serif;
   font-style: italic;
   font-size: clamp(1.15rem, 1.8vw, 1.35rem);
-  opacity: .82;
   animation: fadeSlideUp .9s cubic-bezier(.4,0,.2,1) .3s both;
 }
 
@@ -181,9 +180,27 @@
 .article-author {
   font-family: 'Libre Baskerville', serif;
   font-size: .82rem;
-  opacity: .6;
   font-style: italic;
 }
+
+a.article-card {
+  text-decoration: none;
+  color: inherit;
+  outline-offset: 4px;
+}
+
+/* ── Article skeleton loader ── */
+.article-skeleton .ph-article { background: rgba(255,255,255,.06); }
+.skeleton-line {
+  height: .9rem;
+  border-radius: .3rem;
+  background: linear-gradient(90deg, rgba(255,255,255,.06) 25%, rgba(255,255,255,.12) 50%, rgba(255,255,255,.06) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s infinite;
+}
+.skeleton-line.wide  { width: 85%; }
+.skeleton-line.narrow { width: 52%; margin-top: .4rem; }
+@keyframes shimmer { to { background-position: -200% 0; } }
 
 /* ══════════════════════════════════════════════
    RESOURCES & UPCOMING EVENTS
@@ -218,7 +235,6 @@
   font-style: italic;
   font-size: .8rem;
   font-weight: 400;
-  opacity: .72;
   line-height: 1.6;
 }
 

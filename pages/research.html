@@ -15,6 +15,9 @@
 
   <!-- Quill 2.x editor -->
   <link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet" />
+  <!-- Cropper.js -->
+  <link href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css" rel="stylesheet" />
+
 
   <style>
     /* ════════════════════════════════════════════════════════════════
@@ -53,13 +56,31 @@
       transform: translateY(-2px);
     }
     .btn-new-article {
+      position: relative;
+      overflow: hidden;
+      background: transparent;
+      color: var(--white);
+      border-color: var(--white);
+      transition: color var(--transition), border-color var(--transition),
+                  transform var(--transition), box-shadow var(--transition);
+      z-index: 0;
+    }
+    .btn-new-article::before {
+      content: '';
+      position: absolute;
+      inset: 0;
       background: var(--lavender-bg);
-      color: var(--navy);
-      border-color: var(--lavender-bg);
+      transform: translateX(-100%);
+      transition: transform .5s cubic-bezier(.4,0,.2,1);
+      z-index: -1;
+    }
+    .btn-new-article:hover::before {
+      transform: translateX(0);
     }
     .btn-new-article:hover {
-      background: var(--lavender-lt);
-      transform: translateY(-2px);
+      color: var(--navy);
+      border-color: var(--lavender-bg);
+      transform: scale(1.05);
       box-shadow: 0 8px 22px rgba(207,214,245,.18);
     }
     .user-chip {
@@ -82,7 +103,6 @@
     .user-chip .role {
       font-size: .7rem;
       font-style: italic;
-      opacity: .85;
       letter-spacing: .04em;
     }
 
@@ -101,7 +121,7 @@
       display: inline-flex;
       gap: .3rem;
       background: rgba(255,255,255,.07);
-      border: 1px solid rgba(255,255,255,.14);
+      border: 1px solid rgba(255,255,255,.25);
       border-radius: 2rem;
       padding: .3rem;
     }
@@ -116,13 +136,23 @@
       border-radius: 2rem;
       cursor: pointer;
       opacity: .65;
-      transition: opacity var(--transition), background var(--transition), color var(--transition);
+      transition: opacity var(--transition), background var(--transition),
+                  color var(--transition), transform var(--transition);
     }
-    .research-tabs button:hover { opacity: .9; }
+    .research-tabs button:hover {
+      opacity: 1;
+      background: rgba(255,255,255,.12);
+      transform: scale(1.05);
+    }
     .research-tabs button.active {
       opacity: 1;
-      background: rgba(255,255,255,.15);
-      color: var(--white);
+      background: var(--lavender-bg);
+      color: var(--navy);
+      font-weight: 700;
+    }
+    .research-tabs button.active:hover {
+      background: var(--lavender-lt);
+      transform: scale(1.05);
     }
 
     /* ── View switcher ── */
@@ -139,7 +169,6 @@
       letter-spacing: .14em;
       text-transform: uppercase;
       color: var(--white);
-      opacity: .6;
       margin-bottom: 1rem;
       display: flex;
       align-items: center;
@@ -148,13 +177,19 @@
     .section-label .see-all {
       margin-left: auto;
       font-size: .72rem;
-      opacity: .7;
       cursor: pointer;
       letter-spacing: .08em;
       text-decoration: underline;
       text-underline-offset: 3px;
     }
     .section-label .see-all:hover { opacity: 1; }
+
+    /* ── Home actions (author entry point) ── */
+    .home-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 1.4rem;
+    }
 
     /* ══ HOME 3-COLUMN GRID ══ */
     .home-grid {
@@ -192,7 +227,6 @@
       font-size: .78rem;
       font-family: 'Libre Baskerville', serif;
       color: var(--white);
-      opacity: .6;
     }
 
     /* Center column — featured large */
@@ -222,7 +256,6 @@
       font-size: .82rem;
       font-family: 'Libre Baskerville', serif;
       color: var(--white);
-      opacity: .65;
     }
 
     /* Right column — most popular list */
@@ -256,7 +289,6 @@
       font-size: .72rem;
       font-family: 'Libre Baskerville', serif;
       color: var(--white);
-      opacity: .55;
     }
     .popular-row .thumb {
       width: 3.8rem;
@@ -294,7 +326,6 @@
       padding: .35rem 1rem;
       border-radius: 2rem;
       cursor: pointer;
-      opacity: .55;
       transition: opacity var(--transition), background var(--transition);
     }
     .archive-sort-tabs button.active {
@@ -306,7 +337,6 @@
       background: none;
       border: none;
       color: var(--white);
-      opacity: .6;
       cursor: pointer;
       font-size: 1.1rem;
       padding: .3rem;
@@ -327,7 +357,7 @@
       transition: border-color var(--transition), background var(--transition);
     }
     .archive-search.visible { display: block; }
-    .archive-search::placeholder { color: rgba(255,255,255,.45); }
+    .archive-search::placeholder { color: #ffffff; }
     .archive-search:focus {
       outline: none;
       border-color: var(--lavender-bg);
@@ -360,7 +390,6 @@
       font-size: .8rem;
       font-family: 'Libre Baskerville', serif;
       color: var(--white);
-      opacity: .6;
       margin-bottom: .6rem;
     }
     .archive-row .row-stats {
@@ -369,7 +398,6 @@
       font-size: .78rem;
       font-family: 'Libre Baskerville', serif;
       color: var(--white);
-      opacity: .5;
     }
     .archive-row .cover {
       width: 8rem;
@@ -410,7 +438,6 @@
       border: 1.5px dashed rgba(255,255,255,.2);
       border-radius: var(--radius-card);
       color: var(--white);
-      opacity: .7;
       font-style: italic;
     }
     .loader {
@@ -424,7 +451,7 @@
     @keyframes spin { to { transform: rotate(360deg); } }
 
     /* ════════════════════════════════════════════════════════════════
-       OVERLAYS — reader + composer modals
+       OVERLAYS — composer modal
     ════════════════════════════════════════════════════════════════ */
     .overlay {
       position: fixed;
@@ -474,171 +501,6 @@
       transform: scale(1.08);
     }
 
-    /* Reader modal */
-    .reader .reader-cover {
-      width: 100%;
-      aspect-ratio: 21 / 9;
-      background-size: cover;
-      background-position: center;
-      background-color: var(--navy-mid);
-    }
-    .reader .reader-body {
-      padding: 2.6rem 3rem 3rem;
-    }
-    .reader .eyebrow {
-      font-family: 'Libre Baskerville', serif;
-      font-size: .78rem;
-      letter-spacing: .18em;
-      text-transform: uppercase;
-      color: var(--lavender-bg);
-      margin-bottom: 1rem;
-    }
-    .reader h2 {
-      font-family: 'The Seasons', 'Cormorant Garamond', Georgia, serif;
-      font-size: clamp(1.9rem, 3.4vw, 2.8rem);
-      letter-spacing: .04em;
-      color: var(--white);
-      margin-bottom: .8rem;
-      line-height: 1.18;
-    }
-    .reader .subtitle {
-      font-style: italic;
-      color: var(--white);
-      opacity: .9;
-      font-size: 1.1rem;
-      margin-bottom: 1.6rem;
-    }
-    .reader .reader-meta {
-      display: flex;
-      align-items: center;
-      gap: .8rem;
-      padding: 1rem 0;
-      border-top: 1px solid rgba(255,255,255,.12);
-      border-bottom: 1px solid rgba(255,255,255,.12);
-      margin-bottom: 2rem;
-      color: var(--white);
-      font-family: 'Libre Baskerville', serif;
-      font-size: .9rem;
-    }
-    .reader .reader-meta img {
-      width: 2.2rem; height: 2.2rem; border-radius: 50%;
-      border: 1px solid rgba(255,255,255,.4);
-    }
-    .reader .reader-meta .author { font-weight: 700; }
-    .reader .reader-meta .dot { opacity: .5; }
-
-    /* Rendered article body */
-    .reader-content {
-      color: var(--white);
-      font-family: 'Libre Baskerville', serif;
-      font-size: 1.02rem;
-      line-height: 1.8;
-    }
-    .reader-content h1, .reader-content h2, .reader-content h3,
-    .reader-content h4, .reader-content h5, .reader-content h6 {
-      font-family: 'The Seasons', 'Cormorant Garamond', Georgia, serif;
-      color: var(--white);
-      letter-spacing: .04em;
-      margin: 2rem 0 .8rem;
-      line-height: 1.25;
-    }
-    .reader-content h1 { font-size: 1.9rem; }
-    .reader-content h2 { font-size: 1.6rem; }
-    .reader-content h3 { font-size: 1.35rem; }
-    .reader-content p { margin-bottom: 1rem; color: var(--white); }
-    .reader-content a { color: var(--lavender-bg); text-decoration: underline; }
-    .reader-content a:hover { color: var(--lavender-lt); }
-    .reader-content blockquote {
-      border-left: 3px solid var(--lavender-bg);
-      padding-left: 1.2rem;
-      margin: 1.5rem 0;
-      font-style: italic;
-      color: var(--white);
-      opacity: .92;
-    }
-    .reader-content ul, .reader-content ol {
-      margin: 0 0 1rem 1.6rem;
-      color: var(--white);
-    }
-    .reader-content li { margin-bottom: .4rem; }
-    .reader-content img {
-      width: 100%;
-      border-radius: 1rem;
-      margin: 1.5rem 0;
-      border: 1px solid rgba(255,255,255,.18);
-    }
-    .reader-content pre, .reader-content code {
-      background: rgba(255,255,255,.08);
-      border-radius: .4rem;
-      color: var(--white);
-      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    }
-    .reader-content code { padding: .1rem .35rem; font-size: .9em; }
-    .reader-content pre { padding: 1rem; overflow-x: auto; margin: 1rem 0; }
-
-    /* Action bar */
-    .action-bar {
-      display: flex;
-      gap: .8rem;
-      align-items: center;
-      padding: 1.5rem 0 .5rem;
-      margin-top: 2rem;
-      border-top: 1px solid rgba(255,255,255,.12);
-      flex-wrap: wrap;
-    }
-    .action-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: .5rem;
-      padding: .6rem 1.1rem;
-      border: 1.5px solid rgba(255,255,255,.25);
-      border-radius: var(--radius-btn);
-      background: transparent;
-      color: var(--white);
-      font-family: 'Libre Baskerville', serif;
-      font-size: .85rem;
-      cursor: pointer;
-      transition: background var(--transition), border-color var(--transition),
-                  transform var(--transition), color var(--transition);
-    }
-    .action-btn:hover {
-      border-color: var(--white);
-      transform: translateY(-2px);
-    }
-    .action-btn.active {
-      background: var(--lavender-bg);
-      color: var(--navy);
-      border-color: var(--lavender-bg);
-    }
-    .action-btn.active svg { fill: var(--navy); }
-    .action-btn svg {
-      width: 1rem; height: 1rem;
-      fill: var(--white);
-      transition: fill var(--transition), transform var(--transition);
-    }
-    .action-btn.pulse svg { animation: pulse .5s ease; }
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); }
-      50%      { transform: scale(1.4); }
-    }
-    .reader-tags {
-      display: flex;
-      gap: .4rem;
-      flex-wrap: wrap;
-      margin: 1.5rem 0 0;
-    }
-    .reader-tags span {
-      padding: .3rem .8rem;
-      background: rgba(207,214,245,.12);
-      border: 1px solid rgba(207,214,245,.35);
-      border-radius: var(--radius-btn);
-      font-size: .72rem;
-      letter-spacing: .06em;
-      text-transform: uppercase;
-      color: var(--white);
-      font-family: 'Libre Baskerville', serif;
-    }
-
     /* Composer modal */
     .composer .composer-header {
       padding: 1.6rem 2.4rem 1.2rem;
@@ -659,7 +521,6 @@
       letter-spacing: .12em;
       text-transform: uppercase;
       color: var(--white);
-      opacity: .85;
       margin-bottom: .5rem;
     }
     .composer input[type="text"],
@@ -802,7 +663,7 @@
     }
     .ql-snow .ql-picker-item { color: var(--white) !important; }
     .ql-editor.ql-blank::before {
-      color: rgba(255,255,255,.45) !important;
+      color: #ffffff !important;
       font-style: italic;
     }
     .ql-editor a { color: var(--lavender-bg); }
@@ -881,6 +742,61 @@
       transform: translateX(-50%) translateY(0);
     }
 
+    /* ── Byline avatar in cards ── */
+    .card-byline {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      font-size: .78rem;
+      font-family: 'Libre Baskerville', serif;
+      color: var(--white);
+    }
+    .byline-avatar {
+      width: 1.5rem;
+      height: 1.5rem;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,.25);
+      object-fit: cover;
+      flex-shrink: 0;
+      background: var(--navy-mid);
+    }
+    .byline-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    /* ── Crop overlay ── */
+    .crop-modal {
+      width: min(56rem, 100%);
+    }
+    .crop-modal .crop-body {
+      padding: 1.5rem 2.4rem 2rem;
+    }
+    .crop-container {
+      max-height: 55vh;
+      overflow: hidden;
+      border-radius: .8rem;
+      background: rgba(0,0,0,.4);
+    }
+    .crop-container img {
+      display: block;
+      max-width: 100%;
+    }
+    .crop-hint {
+      font-family: 'Libre Baskerville', serif;
+      font-size: .78rem;
+      color: var(--white);
+      opacity: .55;
+      text-align: center;
+      margin-top: .8rem;
+      font-style: italic;
+    }
+    .crop-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: .8rem;
+      margin-top: 1.4rem;
+      padding-top: 1.2rem;
+      border-top: 1px solid rgba(255,255,255,.12);
+    }
+
     /* ── Responsive ── */
     @media (max-width: 62rem) {
       .home-grid { grid-template-columns: 1fr 1.4fr; }
@@ -891,7 +807,6 @@
       .home-left { flex-direction: row; overflow-x: auto; gap: 1rem; }
       .home-left .small-card { min-width: 55vw; }
       .archive-row .cover { width: 6rem; }
-      .reader .reader-body { padding: 2rem 1.6rem; }
       .composer form, .composer .composer-header { padding-inline: 1.6rem; }
     }
     @media (max-width: 36rem) {
@@ -902,40 +817,7 @@
 </head>
 <body>
 
-  <nav>
-    <div class="container nav-inner">
-      <a href="/" class="nav-logo">
-        <img src="../assets/images/logo/urbanbearlogo.png" alt="Urban Bears logo" class="nav-logo-img" />
-        <div class="nav-logo-text">
-          <span class="brand">URBAN BEARS</span>
-          <span class="tagline">Biomedical Engineering and Research Student Network</span>
-        </div>
-      </a>
-
-      <ul class="nav-links" id="nav-links">
-        <li><a href="/">Home</a></li>
-        <li><a href="research.html">Research</a></li>
-        <li><a href="opportunities.html">Opportunities</a></li>
-        <li><a href="read.html">Read</a></li>
-        <li><a href="about.html">About</a></li>
-      </ul>
-
-      <a href="#" class="btn-donate">Donate</a>
-
-      <div class="nav-auth">
-        <button class="btn-nav-signin" id="btn-signin" hidden>Sign in</button>
-        <div class="nav-user-wrap" id="nav-user-wrap" hidden>
-          <div class="nav-profile-content" id="nav-user-chip"></div>
-          <span class="nav-signout-text" aria-hidden="true">Sign out</span>
-          <button id="btn-signout" class="nav-signout-btn" aria-label="Sign out"></button>
-        </div>
-      </div>
-
-      <button class="nav-hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false">
-        <span></span><span></span><span></span>
-      </button>
-    </div>
-  </nav>
+  <div data-component="nav"></div>
 
   <div class="container">
     <div class="journal-topbar">
@@ -974,36 +856,21 @@
     </section>
   </div>
 
-  <!-- ─── READER OVERLAY ─── -->
-  <div class="overlay" id="reader-overlay" role="dialog" aria-hidden="true">
-    <div class="modal reader" id="reader-modal">
-      <button class="modal-close" id="reader-close" aria-label="Close">×</button>
-      <div class="reader-cover" id="reader-cover"></div>
-      <div class="reader-body">
-        <div class="eyebrow" id="reader-eyebrow">Research</div>
-        <h2 id="reader-title"></h2>
-        <p class="subtitle" id="reader-subtitle"></p>
-        <div class="reader-meta">
-          <img id="reader-author-photo" src="" alt="" />
-          <span class="author" id="reader-author-name"></span>
-          <span class="dot">·</span>
-          <span id="reader-date"></span>
+  <!-- ─── CROP OVERLAY ─── -->
+  <div class="overlay" id="crop-overlay" role="dialog" aria-hidden="true">
+    <div class="modal crop-modal">
+      <button class="modal-close" id="crop-close" aria-label="Close">×</button>
+      <div class="composer-header">
+        <h2>Crop Cover Image</h2>
+      </div>
+      <div class="crop-body">
+        <div class="crop-container">
+          <img id="crop-image" src="" alt="Crop preview" />
         </div>
-        <div class="reader-content" id="reader-content"></div>
-        <div class="reader-tags" id="reader-tags"></div>
-        <div class="action-bar">
-          <button class="action-btn" id="action-like" data-action="like">
-            <svg viewBox="0 0 24 24"><path d="M12 21s-7-4.5-9.5-9C.6 8 3 4 7 4c2 0 3.5 1 5 3 1.5-2 3-3 5-3 4 0 6.4 4 4.5 8-2.5 4.5-9.5 9-9.5 9z"/></svg>
-            <span id="like-count">0</span>
-          </button>
-          <button class="action-btn" id="action-repost" data-action="repost">
-            <svg viewBox="0 0 24 24"><path d="M17 1l4 4-4 4V6H7v4H5V4h12V1zM7 23l-4-4 4-4v3h10v-4h2v6H7v3z"/></svg>
-            <span id="repost-count">0</span>
-          </button>
-          <button class="action-btn" id="action-share" data-action="share">
-            <svg viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z"/></svg>
-            <span>Share</span>
-          </button>
+        <p class="crop-hint">Drag to reposition · Pinch or scroll to zoom · Resize handles to adjust</p>
+        <div class="crop-footer">
+          <button type="button" class="btn-cancel" id="btn-crop-cancel">Cancel</button>
+          <button type="button" class="btn-publish" id="btn-crop-confirm">Use this crop</button>
         </div>
       </div>
     </div>
@@ -1052,44 +919,31 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <footer>
-    <div class="container">
-      <p>&copy; 2026 Urban BEARS &mdash; Biomedical Engineering and Research Student Network &mdash; Nonprofit Organization</p>
-    </div>
-  </footer>
+  <div data-component="footer"></div>
 
-  <script src="../js/main.js"></script>
-
-  <!-- Quill + markdown -->
+  <!-- Quill + markdown + image cropper -->
   <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked@13/marked.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
 
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+    import { loadComponents } from '/js/components.js';
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-analytics.js";
     import {
       getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged
     } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
-    import {
-      getFirestore, collection, doc, getDoc, getDocs, setDoc, addDoc, deleteDoc,
-      query, orderBy, limit, where, serverTimestamp, increment, updateDoc, onSnapshot
-    } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+    import { doc, getDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+    import { checkAndShowProfileModal } from '/js/profile-modal.js';
+    import { app, db, fetchArticles, publishArticle } from '/js/articles.js';
 
-    /* ── Firebase init ── */
-    const firebaseConfig = {
-      apiKey: "AIzaSyCubjX7XwPD9lfOh2kdBO0DRlDQSn9OZWs",
-      authDomain: "urban-bears.firebaseapp.com",
-      projectId: "urban-bears",
-      storageBucket: "urban-bears.firebasestorage.app",
-      messagingSenderId: "624423642068",
-      appId: "1:624423642068:web:78c4845d6765a9dc07ec41",
-      measurementId: "G-9W94R3112S"
-    };
-    const app = initializeApp(firebaseConfig);
+    /* Shared components (nav, footer, profile modal) must be in the DOM
+       before any code below queries it. */
+    await loadComponents();
+    await import('/js/main.js');
+
     try { getAnalytics(app); } catch (e) { /* analytics fails on file:// — fine */ }
     const auth = getAuth(app);
-    const db = getFirestore(app);
     const provider = new GoogleAuthProvider();
 
     /* ── Image helpers (no Storage — downscale + compress to data URL) ──
@@ -1130,10 +984,13 @@
     const state = {
       user: null,
       isAuthor: false,
+      authorSchool: '',
       articles: [],
       activeTag: null,
-      currentArticleId: null,
-      currentArticleUnsub: null,
+    };
+
+    const openReader = (id) => {
+      window.location.href = `article.html?id=${encodeURIComponent(id)}`;
     };
 
     /* ── Element refs ── */
@@ -1151,21 +1008,6 @@
       homeContent:   $('home-content'),
       archiveContent:$('archive-content'),
       archiveSearch: $('archive-search'),
-      readerOverlay: $('reader-overlay'),
-      readerClose:   $('reader-close'),
-      readerCover:   $('reader-cover'),
-      readerTitle:   $('reader-title'),
-      readerSubtitle:$('reader-subtitle'),
-      readerAuthorPhoto: $('reader-author-photo'),
-      readerAuthorName:  $('reader-author-name'),
-      readerDate:    $('reader-date'),
-      readerContent: $('reader-content'),
-      readerTags:    $('reader-tags'),
-      likeBtn:       $('action-like'),
-      repostBtn:     $('action-repost'),
-      shareBtn:      $('action-share'),
-      likeCount:     $('like-count'),
-      repostCount:   $('repost-count'),
       composerOverlay: $('composer-overlay'),
       composerClose: $('composer-close'),
       composerForm:  $('composer-form'),
@@ -1238,15 +1080,19 @@
     onAuthStateChanged(auth, async (user) => {
       state.user = user;
       state.isAuthor = false;
+      state.authorSchool = '';
       if (user) {
+        checkAndShowProfileModal(user, app);
         try {
-          const authorDoc = await getDoc(doc(db, 'authors', user.uid));
+          const [authorDoc, userDoc] = await Promise.all([
+            getDoc(doc(db, 'authors', user.uid)),
+            getDoc(doc(db, 'users', user.uid)),
+          ]);
           state.isAuthor = authorDoc.exists();
+          if (userDoc.exists()) state.authorSchool = userDoc.data().schoolName || '';
         } catch (e) { console.warn('author check failed', e); }
       }
       renderAuthBar();
-      // Re-render reader buttons if open
-      if (state.currentArticleId) syncActionButtons();
     });
 
     /* ════════════════════════════════════════════════════════
@@ -1267,9 +1113,7 @@
     ════════════════════════════════════════════════════════ */
     const loadArticles = async () => {
       try {
-        const q = query(collection(db, 'articles'), orderBy('createdAt', 'desc'), limit(60));
-        const snap = await getDocs(q);
-        state.articles = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        state.articles = await fetchArticles({ limit: 60 });
       } catch (e) {
         console.error('load articles failed', e);
         state.articles = [];
@@ -1301,7 +1145,10 @@
         <article class="small-card" data-id="${a.id}">
           <div class="cover" ${a.coverUrl ? `style="background-image:url('${escapeHtml(a.coverUrl)}')"` : ''}></div>
           <h3>${escapeHtml(a.title || 'Untitled')}</h3>
-          <div class="card-meta">${escapeHtml(a.authorName || 'Anonymous')} · ${fmtDate(a.createdAt)}</div>
+          <div class="card-byline">
+            ${a.authorPhoto ? `<img class="byline-avatar" src="${escapeHtml(a.authorPhoto)}" alt="" />` : ''}
+            <span class="byline-text">${escapeHtml(a.authorName || 'Anonymous')}${a.authorSchool ? ' · ' + escapeHtml(a.authorSchool) : ''} · ${fmtDate(a.createdAt)}</span>
+          </div>
         </article>`;
 
       const featuredCoverStyle = featured.coverUrl
@@ -1317,6 +1164,10 @@
         </div>`;
 
       els.homeContent.innerHTML = `
+        ${state.isAuthor ? `
+          <div class="home-actions">
+            <button class="btn-new-article" id="home-new-article">+ New Article</button>
+          </div>` : ''}
         <div class="home-grid">
           <div class="home-left">
             ${leftArticles.length ? leftArticles.map(smallCardHtml).join('') : ''}
@@ -1325,7 +1176,10 @@
             <article class="featured-center" data-id="${featured.id}">
               <div class="cover" ${featuredCoverStyle}></div>
               <h2>${escapeHtml(featured.title || 'Untitled')}</h2>
-              <div class="card-meta">${escapeHtml(featured.authorName || 'Anonymous')} · ${fmtDate(featured.createdAt)}</div>
+              <div class="card-byline">
+                ${featured.authorPhoto ? `<img class="byline-avatar" src="${escapeHtml(featured.authorPhoto)}" alt="" />` : ''}
+                <span class="byline-text">${escapeHtml(featured.authorName || 'Anonymous')}${featured.authorSchool ? ' · ' + escapeHtml(featured.authorSchool) : ''} · ${fmtDate(featured.createdAt)}</span>
+              </div>
             </article>
           </div>
           <div class="home-right">
@@ -1343,6 +1197,7 @@
         e.stopPropagation();
         document.querySelector('.research-tabs [data-view="archive"]').click();
       });
+      els.homeContent.querySelector('#home-new-article')?.addEventListener('click', openComposer);
     };
 
     /* ════════════════════════════════════════════════════════
@@ -1373,7 +1228,10 @@
             <li class="archive-row" data-id="${a.id}" style="animation-delay:${i * 0.04}s">
               <div class="info">
                 <h3>${escapeHtml(a.title || 'Untitled')}</h3>
-                <div class="row-meta">${escapeHtml(a.authorName || 'Anonymous')} · ${fmtDate(a.createdAt)} · URBANBEARS</div>
+                <div class="row-meta card-byline">
+                  ${a.authorPhoto ? `<img class="byline-avatar" src="${escapeHtml(a.authorPhoto)}" alt="" />` : ''}
+                  <span class="byline-text">${escapeHtml(a.authorName || 'Anonymous')}${a.authorSchool ? ' · ' + escapeHtml(a.authorSchool) : ''} · ${fmtDate(a.createdAt)} · URBANBEARS</span>
+                </div>
                 <div class="row-stats">
                   <span>♥ ${a.likeCount || 0}</span>
                   <span>↻ ${a.repostCount || 0}</span>
@@ -1403,118 +1261,6 @@
     document.getElementById('archive-search-btn').addEventListener('click', () => {
       els.archiveSearch.classList.toggle('visible');
       if (els.archiveSearch.classList.contains('visible')) els.archiveSearch.focus();
-    });
-
-    /* ════════════════════════════════════════════════════════
-       READER
-    ════════════════════════════════════════════════════════ */
-    const openReader = async (articleId) => {
-      state.currentArticleId = articleId;
-      openOverlay(els.readerOverlay);
-
-      // Live subscription so likeCount/repostCount update in realtime
-      if (state.currentArticleUnsub) state.currentArticleUnsub();
-      state.currentArticleUnsub = onSnapshot(doc(db, 'articles', articleId), (snap) => {
-        if (!snap.exists()) return;
-        const a = { id: snap.id, ...snap.data() };
-        renderReader(a);
-      });
-
-      // Bump view count (best-effort)
-      try {
-        await updateDoc(doc(db, 'articles', articleId), { viewCount: increment(1) });
-      } catch (e) { /* not critical */ }
-
-      syncActionButtons();
-    };
-
-    const renderReader = (a) => {
-      els.readerCover.style.backgroundImage = a.coverUrl ? `url('${a.coverUrl}')` : '';
-      els.readerTitle.textContent = a.title || 'Untitled';
-      els.readerSubtitle.textContent = a.subtitle || '';
-      els.readerSubtitle.style.display = a.subtitle ? '' : 'none';
-      els.readerAuthorPhoto.src = a.authorPhoto || '';
-      els.readerAuthorPhoto.style.display = a.authorPhoto ? '' : 'none';
-      els.readerAuthorName.textContent = a.authorName || 'Anonymous';
-      els.readerDate.textContent = fmtDate(a.createdAt);
-      els.readerContent.innerHTML = DOMPurify.sanitize(a.body || '');
-      els.readerTags.innerHTML = (a.tags || [])
-        .map(t => `<span>${escapeHtml(t)}</span>`).join('');
-      els.likeCount.textContent = a.likeCount || 0;
-      els.repostCount.textContent = a.repostCount || 0;
-    };
-
-    const syncActionButtons = async () => {
-      els.likeBtn.classList.remove('active');
-      els.repostBtn.classList.remove('active');
-      if (!state.user || !state.currentArticleId) return;
-      try {
-        const [likeSnap, repostSnap] = await Promise.all([
-          getDoc(doc(db, 'articles', state.currentArticleId, 'likes', state.user.uid)),
-          getDoc(doc(db, 'articles', state.currentArticleId, 'reposts', state.user.uid)),
-        ]);
-        if (likeSnap.exists()) els.likeBtn.classList.add('active');
-        if (repostSnap.exists()) els.repostBtn.classList.add('active');
-      } catch (e) { /* ignore */ }
-    };
-
-    els.readerClose.addEventListener('click', () => {
-      closeOverlay(els.readerOverlay);
-      if (state.currentArticleUnsub) state.currentArticleUnsub();
-      state.currentArticleUnsub = null;
-      state.currentArticleId = null;
-    });
-    els.readerOverlay.addEventListener('click', (e) => {
-      if (e.target === els.readerOverlay) els.readerClose.click();
-    });
-
-    /* ── Like / Repost / Share ── */
-    const toggleEngagement = async (type) => {
-      if (!state.user) {
-        showToast('Sign in to interact');
-        return;
-      }
-      const id = state.currentArticleId;
-      if (!id) return;
-      const subRef = doc(db, 'articles', id, type === 'like' ? 'likes' : 'reposts', state.user.uid);
-      const countField = type === 'like' ? 'likeCount' : 'repostCount';
-      const btn = type === 'like' ? els.likeBtn : els.repostBtn;
-      try {
-        const snap = await getDoc(subRef);
-        if (snap.exists()) {
-          await deleteDoc(subRef);
-          await updateDoc(doc(db, 'articles', id), { [countField]: increment(-1) });
-          btn.classList.remove('active');
-        } else {
-          await setDoc(subRef, { createdAt: serverTimestamp() });
-          await updateDoc(doc(db, 'articles', id), { [countField]: increment(1) });
-          btn.classList.add('active');
-          btn.classList.add('pulse');
-          setTimeout(() => btn.classList.remove('pulse'), 500);
-        }
-      } catch (e) {
-        console.error(e);
-        showToast('Action failed');
-      }
-    };
-
-    els.likeBtn.addEventListener('click', () => toggleEngagement('like'));
-    els.repostBtn.addEventListener('click', () => toggleEngagement('repost'));
-    els.shareBtn.addEventListener('click', async () => {
-      const id = state.currentArticleId;
-      if (!id) return;
-      const url = `${location.origin}${location.pathname}?article=${id}`;
-      try {
-        if (navigator.share) {
-          await navigator.share({ url, title: els.readerTitle.textContent });
-        } else {
-          await navigator.clipboard.writeText(url);
-          showToast('Link copied');
-        }
-      } catch (e) {
-        try { await navigator.clipboard.writeText(url); showToast('Link copied'); }
-        catch { showToast('Could not share'); }
-      }
     });
 
     /* ════════════════════════════════════════════════════════
@@ -1621,25 +1367,77 @@
       }
     });
 
+    /* ── Cover image crop flow ── */
+    let cropperInstance = null;
+
+    const openCropModal = (rawDataUrl) => {
+      const cropImg = document.getElementById('crop-image');
+      cropImg.src = rawDataUrl;
+      openOverlay(document.getElementById('crop-overlay'));
+
+      // Destroy previous cropper before creating a new one
+      if (cropperInstance) { cropperInstance.destroy(); cropperInstance = null; }
+      cropImg.onload = () => {
+        cropperInstance = new Cropper(cropImg, {
+          aspectRatio: 21 / 9,
+          viewMode: 1,
+          autoCropArea: 1,
+          movable: true,
+          zoomable: true,
+          rotatable: false,
+          scalable: false,
+          background: false,
+        });
+      };
+      // If already loaded (same src), trigger manually
+      if (cropImg.complete) cropImg.onload();
+    };
+
+    document.getElementById('btn-crop-confirm').addEventListener('click', () => {
+      if (!cropperInstance) return;
+      const canvas = cropperInstance.getCroppedCanvas({ width: COVER_MAX_W, imageSmoothingQuality: 'high' });
+      coverDataUrl = canvas.toDataURL('image/jpeg', QUALITY);
+      els.coverDropzone.style.backgroundImage = `url('${coverDataUrl}')`;
+      els.coverDropzone.classList.add('has-image');
+      closeOverlay(document.getElementById('crop-overlay'));
+      cropperInstance.destroy();
+      cropperInstance = null;
+    });
+
+    const cancelCrop = () => {
+      closeOverlay(document.getElementById('crop-overlay'));
+      if (cropperInstance) { cropperInstance.destroy(); cropperInstance = null; }
+      // Reset file input so the user can re-pick
+      els.compCover.value = '';
+    };
+    document.getElementById('crop-close').addEventListener('click', cancelCrop);
+    document.getElementById('btn-crop-cancel').addEventListener('click', cancelCrop);
+
     els.compCover.addEventListener('change', async () => {
       const file = els.compCover.files?.[0];
       if (!file) return;
       try {
-        coverDataUrl = await fileToCompressedDataUrl(file, COVER_MAX_W);
-        els.coverDropzone.style.backgroundImage = `url('${coverDataUrl}')`;
-        els.coverDropzone.classList.add('has-image');
+        // Read raw data URL for Cropper (no downscale yet — cropper handles that on confirm)
+        const rawUrl = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onerror = () => reject(reader.error);
+          reader.onload = () => resolve(reader.result);
+          reader.readAsDataURL(file);
+        });
+        openCropModal(rawUrl);
       } catch (e) {
         console.error(e);
         showToast('Could not load image');
       }
     });
 
-    els.btnNewArticle.addEventListener('click', () => {
+    const openComposer = () => {
       if (!state.isAuthor) return;
       resetComposer();
       initQuill();
       openOverlay(els.composerOverlay);
-    });
+    };
+    els.btnNewArticle.addEventListener('click', openComposer);
 
     const closeComposer = () => {
       closeOverlay(els.composerOverlay);
@@ -1661,6 +1459,8 @@
       const subtitle = els.compSubtitle.value.trim();
       const body = DOMPurify.sanitize(quill.root.innerHTML);
       if (!title) { showToast('Title required'); return; }
+      if (!coverDataUrl) { showToast('Cover image required'); els.coverDropzone.style.outline = '2px solid rgba(255,160,160,.7)'; return; }
+      els.coverDropzone.style.outline = '';
       if (quill.getText().trim().length < 1) { showToast('Body required'); return; }
 
       // Firestore caps docs at ~1 MiB. Estimate the payload before sending.
@@ -1674,7 +1474,7 @@
       els.btnPublish.textContent = 'Publishing…';
 
       try {
-        await addDoc(collection(db, 'articles'), {
+        await publishArticle({
           title,
           subtitle,
           body,
@@ -1683,11 +1483,7 @@
           authorUid: state.user.uid,
           authorName: state.user.displayName || 'Anonymous',
           authorPhoto: state.user.photoURL || '',
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp(),
-          likeCount: 0,
-          repostCount: 0,
-          viewCount: 0,
+          authorSchool: state.authorSchool || '',
         });
         showToast('Published!');
         closeComposer();
@@ -1706,19 +1502,16 @@
     ════════════════════════════════════════════════════════ */
     document.addEventListener('keydown', (e) => {
       if (e.key !== 'Escape') return;
-      if (els.composerOverlay.classList.contains('open')) closeComposer();
-      else if (els.readerOverlay.classList.contains('open')) els.readerClose.click();
+      if (document.getElementById('crop-overlay').classList.contains('open')) cancelCrop();
+      else if (els.composerOverlay.classList.contains('open')) closeComposer();
     });
-
-    /* ════════════════════════════════════════════════════════
-       Deep-link ?article=ID opens the reader
-    ════════════════════════════════════════════════════════ */
-    const initialArticle = new URLSearchParams(location.search).get('article');
 
     /* ── Bootstrap ── */
-    loadArticles().then(() => {
-      if (initialArticle) openReader(initialArticle);
-    });
+    loadArticles();
   </script>
+
+  <!-- ── Profile Setup Modal ── -->
+  <div data-component="profile-modal"></div>
+
 </body>
 </html>

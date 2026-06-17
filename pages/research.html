@@ -565,7 +565,8 @@
       font-style: italic;
       font-size: .9rem;
       overflow: hidden;
-      transition: border-color var(--transition), background-color var(--transition);
+      transition: border-color var(--transition), background-color var(--transition),
+                  transform var(--transition), box-shadow var(--transition);
     }
     .cover-dropzone:hover { border-color: var(--white); }
     .cover-dropzone.has-image { border-style: solid; border-color: rgba(255,255,255,.3); }
@@ -575,11 +576,65 @@
       padding: .7rem 1.3rem;
       border-radius: var(--radius-btn);
       pointer-events: none;
+      z-index: 2;
     }
     .cover-dropzone input[type="file"] {
       position: absolute; inset: 0;
       opacity: 0; cursor: pointer;
+      z-index: 3;
     }
+    /* Drag-over state — blur backdrop + lavender border */
+    .cover-dropzone.is-dragging {
+      border-style: solid;
+      border-color: var(--lavender-bg);
+      transform: scale(1.01);
+      box-shadow: 0 10px 30px rgba(207,214,245,.18);
+    }
+    .cover-dropzone.is-dragging::after {
+      content: 'Drop to upload';
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(18,18,46,.55);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      color: var(--white);
+      font-family: 'Libre Baskerville', serif;
+      font-style: italic;
+      font-size: 1rem;
+      letter-spacing: .06em;
+      z-index: 4;
+      pointer-events: none;
+      animation: fadeIn .2s ease both;
+    }
+    /* Loading state — spinner overlay while reading the file */
+    .cover-dropzone.is-loading { cursor: progress; }
+    .cover-dropzone.is-loading .cover-prompt { display: none; }
+    .cover-dropzone.is-loading input[type="file"] { pointer-events: none; }
+    .cover-dropzone.is-loading::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(18,18,46,.55);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      z-index: 4;
+      pointer-events: none;
+    }
+    .cover-dropzone .cover-spinner {
+      position: absolute;
+      width: 2.4rem; height: 2.4rem;
+      border: 3px solid rgba(255,255,255,.2);
+      border-top-color: var(--white);
+      border-radius: 50%;
+      animation: spin .9s linear infinite;
+      display: none;
+      z-index: 5;
+      pointer-events: none;
+    }
+    .cover-dropzone.is-loading .cover-spinner { display: block; }
 
     /* Tags input */
     .tag-input-wrap {
@@ -896,13 +951,14 @@
           <label>Cover image</label>
           <div class="cover-dropzone" id="cover-dropzone">
             <span class="cover-prompt">Click or drop an image</span>
+            <div class="cover-spinner" aria-label="Loading image"></div>
             <input type="file" id="comp-cover" accept="image/*" />
           </div>
         </div>
         <div class="field">
-          <label>Tags</label>
+          <label>Tags <span aria-hidden="true">*</span></label>
           <div class="tag-input-wrap" id="tag-input-wrap">
-            <input type="text" id="comp-tag-input" placeholder="Type and press Enter…" />
+            <input type="text" id="comp-tag-input" placeholder="Add at least one tag — type and press Enter…" />
           </div>
         </div>
         <div class="field">
@@ -1358,7 +1414,11 @@
       if (e.key === 'Enter' || e.key === ',') {
         e.preventDefault();
         const v = els.compTagInput.value.trim().replace(/,$/, '');
-        if (v) { tags.add(v); renderTagPills(); }
+        if (v) {
+          tags.add(v);
+          renderTagPills();
+          els.tagInputWrap.style.borderColor = '';
+        }
         els.compTagInput.value = '';
       } else if (e.key === 'Backspace' && !els.compTagInput.value && tags.size) {
         const last = [...tags].pop();
@@ -1372,12 +1432,13 @@
 
     const openCropModal = (rawDataUrl) => {
       const cropImg = document.getElementById('crop-image');
-      cropImg.src = rawDataUrl;
       openOverlay(document.getElementById('crop-overlay'));
 
       // Destroy previous cropper before creating a new one
       if (cropperInstance) { cropperInstance.destroy(); cropperInstance = null; }
-      cropImg.onload = () => {
+
+      const initCropper = () => {
+        if (cropperInstance) return;
         cropperInstance = new Cropper(cropImg, {
           aspectRatio: 21 / 9,
           viewMode: 1,
@@ -1389,8 +1450,16 @@
           background: false,
         });
       };
-      // If already loaded (same src), trigger manually
-      if (cropImg.complete) cropImg.onload();
+
+      // Wire onload BEFORE setting src so we don't miss the event
+      cropImg.onload = initCropper;
+      cropImg.onerror = () => {
+        showToast('Could not load image');
+        closeOverlay(document.getElementById('crop-overlay'));
+      };
+      cropImg.src = rawDataUrl;
+      // Data URL may already be decoded if same src — trigger manually
+      if (cropImg.complete && cropImg.naturalWidth > 0) initCropper();
     };
 
     document.getElementById('btn-crop-confirm').addEventListener('click', () => {
@@ -1413,11 +1482,14 @@
     document.getElementById('crop-close').addEventListener('click', cancelCrop);
     document.getElementById('btn-crop-cancel').addEventListener('click', cancelCrop);
 
-    els.compCover.addEventListener('change', async () => {
-      const file = els.compCover.files?.[0];
+    const handleCoverFile = async (file) => {
       if (!file) return;
+      if (!file.type.startsWith('image/')) {
+        showToast('Please choose an image file');
+        return;
+      }
+      els.coverDropzone.classList.add('is-loading');
       try {
-        // Read raw data URL for Cropper (no downscale yet — cropper handles that on confirm)
         const rawUrl = await new Promise((resolve, reject) => {
           const reader = new FileReader();
           reader.onerror = () => reject(reader.error);
@@ -1428,7 +1500,52 @@
       } catch (e) {
         console.error(e);
         showToast('Could not load image');
+      } finally {
+        els.coverDropzone.classList.remove('is-loading');
+        // Reset so picking the same file again still fires `change`
+        els.compCover.value = '';
       }
+    };
+
+    els.compCover.addEventListener('change', () => {
+      handleCoverFile(els.compCover.files?.[0]);
+    });
+
+    /* ── Drag & drop handlers ── */
+    let dragDepth = 0;
+    const isFileDrag = (e) => Array.from(e.dataTransfer?.types || []).includes('Files');
+
+    els.coverDropzone.addEventListener('dragenter', (e) => {
+      if (!isFileDrag(e)) return;
+      e.preventDefault();
+      dragDepth++;
+      els.coverDropzone.classList.add('is-dragging');
+    });
+    els.coverDropzone.addEventListener('dragover', (e) => {
+      if (!isFileDrag(e)) return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'copy';
+    });
+    els.coverDropzone.addEventListener('dragleave', (e) => {
+      if (!isFileDrag(e)) return;
+      dragDepth = Math.max(0, dragDepth - 1);
+      if (dragDepth === 0) els.coverDropzone.classList.remove('is-dragging');
+    });
+    els.coverDropzone.addEventListener('drop', (e) => {
+      if (!isFileDrag(e)) return;
+      e.preventDefault();
+      dragDepth = 0;
+      els.coverDropzone.classList.remove('is-dragging');
+      const file = e.dataTransfer.files?.[0];
+      handleCoverFile(file);
+    });
+
+    // Swallow drops that miss the dropzone but happen over the modal,
+    // so the browser doesn't navigate to the image file.
+    ['dragover', 'drop'].forEach(ev => {
+      els.composerOverlay.addEventListener(ev, (e) => {
+        if (isFileDrag(e)) e.preventDefault();
+      });
     });
 
     const openComposer = () => {
@@ -1461,6 +1578,13 @@
       if (!title) { showToast('Title required'); return; }
       if (!coverDataUrl) { showToast('Cover image required'); els.coverDropzone.style.outline = '2px solid rgba(255,160,160,.7)'; return; }
       els.coverDropzone.style.outline = '';
+      if (!tags.size) {
+        showToast('At least one tag required');
+        els.tagInputWrap.style.borderColor = 'rgba(255,160,160,.7)';
+        els.compTagInput.focus();
+        return;
+      }
+      els.tagInputWrap.style.borderColor = '';
       if (quill.getText().trim().length < 1) { showToast('Body required'); return; }
 
       // Firestore caps docs at ~1 MiB. Estimate the payload before sending.

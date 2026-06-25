@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Apply — Urban BEARS</title>
+
+  <link href="https://fonts.cdnfonts.com/css/the-seasons" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="../css/base.css" />
+  <link rel="stylesheet" href="../css/animations.css" />
+  <style>
+    .page-content {
+      position: relative;
+      padding: 3rem 0 6rem;
+    }
+
+    .ps-1  { top: 4%;   left: 2%;   animation: twinkleSlow    7.2s ease-in-out 0s    infinite; }
+    .ps-2  { top: 8%;   right: 4%;  animation: twinkleFast    3.1s ease-in-out .6s   infinite; }
+    .ps-3  { top: 22%;  left: 6%;   animation: twinkleFlicker 4.7s ease-in-out 1.4s  infinite; }
+    .ps-4  { top: 18%;  right: 7%;  animation: twinkleMid     5.3s ease-in-out .2s   infinite; }
+    .ps-5  { top: 55%;  left: 1%;   animation: twinkleFast    2.8s ease-in-out 1.1s  infinite; }
+    .ps-6  { top: 60%;  right: 2%;  animation: twinkleSlow    6.5s ease-in-out 2.1s  infinite; }
+    .ps-7  { top: 80%;  left: 3%;   animation: twinkleMid     4.9s ease-in-out .8s   infinite; }
+    .ps-8  { top: 85%;  right: 4%;  animation: twinkleFlicker 3.8s ease-in-out 1.7s  infinite; }
+
+    /* ── Page header ── */
+    .apply-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+    .apply-header h1 {
+      font-family: 'The Seasons', 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(2.6rem, 6vw, 4.8rem);
+      letter-spacing: .06em;
+      margin-bottom: .75rem;
+    }
+    .apply-header p {
+      font-size: 1.05rem;
+      opacity: .7;
+      letter-spacing: .02em;
+    }
+
+    /* ── Bento grid ── */
+    .bento-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.35fr;
+      grid-template-rows: auto auto;
+      grid-template-areas:
+        "chapter  research"
+        "chapter  explorers";
+      gap: 1.25rem;
+    }
+
+    .bento-card {
+      border: 1.5px solid rgba(255,255,255,.13);
+      border-radius: 1.5rem;
+      padding: 2.4rem 2.6rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+      background: rgba(255,255,255,.03);
+      transition: border-color .3s ease, background .3s ease;
+    }
+    .bento-card:hover {
+      border-color: rgba(255,255,255,.28);
+      background: rgba(255,255,255,.05);
+    }
+
+    .bento-card--chapter   { grid-area: chapter;   background: linear-gradient(145deg, rgba(255,255,255,.04) 0%, rgba(107,85,209,.09) 100%); }
+    .bento-card--research  { grid-area: research;  background: linear-gradient(145deg, rgba(11,92,110,.12) 0%, rgba(255,255,255,.03) 100%); }
+    .bento-card--explorers { grid-area: explorers; background: linear-gradient(145deg, rgba(255,255,255,.03) 0%, rgba(107,85,209,.06) 100%); }
+
+    .bento-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      font-family: 'Libre Baskerville', serif;
+      font-size: .72rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      opacity: .55;
+    }
+    .bento-tag svg { flex-shrink: 0; }
+
+    .bento-card h2 {
+      font-family: 'The Seasons', 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(1.35rem, 2.2vw, 1.75rem);
+      letter-spacing: .04em;
+      line-height: 1.25;
+    }
+
+    .bento-card p {
+      font-size: .97rem;
+      line-height: 1.78;
+      opacity: .82;
+      flex: 1;
+    }
+
+    .apply-btn {
+      position: relative;
+      overflow: hidden;
+      display: inline-block;
+      align-self: flex-start;
+      border: 2px solid var(--white);
+      border-radius: 3rem;
+      padding: .75rem 2rem;
+      font-family: 'Libre Baskerville', serif;
+      font-size: .9rem;
+      font-weight: 700;
+      letter-spacing: .06em;
+      transition: color .3s ease, border-color .3s ease,
+                  transform var(--transition), box-shadow var(--transition);
+      color: inherit;
+      text-decoration: none;
+      z-index: 0;
+    }
+    .apply-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: #0b5c6e;
+      transform: translateX(-100%);
+      transition: transform .5s cubic-bezier(.4,0,.2,1);
+      z-index: -1;
+    }
+    .apply-btn:hover::before { transform: translateX(0); }
+    .apply-btn:hover {
+      color: #ffffff;
+      border-color: #0b5c6e;
+      transform: scale(1.04);
+      box-shadow: 0 4px 22px rgba(255,255,255,.18);
+    }
+
+    @media (max-width: 48rem) {
+      .bento-grid {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+          "chapter"
+          "research"
+          "explorers";
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div data-component="nav"></div>
+
+  <section class="page-content">
+    <div class="page-stars" aria-hidden="true">
+      <span class="ps-1"><svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="white" stroke-width="1.5"><path d="M14 2 L15.5 12.5 L26 14 L15.5 15.5 L14 26 L12.5 15.5 L2 14 L12.5 12.5 Z"/></svg></span>
+      <span class="ps-2"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="1.3"><path d="M6 1 L7 5 L11 6 L7 7 L6 11 L5 7 L1 6 L5 5 Z"/></svg></span>
+      <span class="ps-3"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="white" stroke-width="1.4"><path d="M9 1 L10 8 L17 9 L10 10 L9 17 L8 10 L1 9 L8 8 Z"/></svg></span>
+      <span class="ps-4"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="1.2"><path d="M5 1 L6 4 L9 5 L6 6 L5 9 L4 6 L1 5 L4 4 Z"/></svg></span>
+      <span class="ps-5"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="white" stroke-width="1.3"><path d="M7 1 L8 6 L13 7 L8 8 L7 13 L6 8 L1 7 L6 6 Z"/></svg></span>
+      <span class="ps-6"><svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="white" stroke-width="1.5"><path d="M16 2 L18 14 L30 16 L18 18 L16 30 L14 18 L2 16 L14 14 Z"/></svg></span>
+      <span class="ps-7"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="white" stroke-width="1.4"><path d="M10 1 L11.5 8 L19 10 L11.5 12 L10 19 L8.5 12 L1 10 L8.5 8 Z"/></svg></span>
+      <span class="ps-8"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="white" stroke-width="1.3"><path d="M8 1 L9 7 L15 8 L9 9 L8 15 L7 9 L1 8 L7 7 Z"/></svg></span>
+    </div>
+
+    <div class="container">
+
+      <div class="apply-header reveal">
+        <h1>Apply to Our Team</h1>
+        <p>Choose a program and fill out the application below.</p>
+      </div>
+
+      <div class="bento-grid stagger">
+
+        <!-- Chapter Application -->
+        <div class="bento-card bento-card--chapter">
+          <span class="bento-tag">
+            <svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="white" stroke-width="1.3"><path d="M7 1 L8 6 L13 7 L8 8 L7 13 L6 8 L1 7 L6 6 Z"/></svg>
+            Chapter Program
+          </span>
+          <h2>Chapter Information</h2>
+          <p>As part of its mission statement, UrbanBEARS is dedicated to opening doors for students worldwide to gain hands-on experience with technology and educational resources, enabling them to excel in STEM.</p>
+          <p>We are currently accepting chapter applications from individuals with exemplary leadership skills and a passion for introducing biomedical sciences to others interested in starting a community or school chapter.</p>
+          <a href="https://forms.gle/u319YFQyCNJesVuZ8" class="apply-btn" target="_blank" rel="noopener">
+            Chapter Application
+          </a>
+        </div>
+
+        <!-- Research Mentorship -->
+        <div class="bento-card bento-card--research">
+          <span class="bento-tag">
+            <svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="white" stroke-width="1.3"><path d="M7 1 L8 6 L13 7 L8 8 L7 13 L6 8 L1 7 L6 6 Z"/></svg>
+            Student Research
+          </span>
+          <h2>UrbanBEARS Mentorship Program</h2>
+          <p>The BEARS Research Program is a rigorous and selective research program designed for passionate students in the biomedical field seeking an introduction to scientific research and to develop their own projects with real, meaningful impact. Students join a cohort of interns to collaborate or work independently on a research project of their choice and receive guidance from an experienced researcher. Culminating in a research project to be shared at a symposium at the end of the term.</p>
+          <a href="https://forms.gle/XbhJNPSV8aHKXwfF9" class="apply-btn" target="_blank" rel="noopener">
+            Research Application
+          </a>
+        </div>
+
+        <!-- BEARS Explorers -->
+        <div class="bento-card bento-card--explorers">
+          <span class="bento-tag">
+            <svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="white" stroke-width="1.3"><path d="M7 1 L8 6 L13 7 L8 8 L7 13 L6 8 L1 7 L6 6 Z"/></svg>
+            Popular Science
+          </span>
+          <h2>BEARS Explorers</h2>
+          <p>Built for passionate and curious middle and high schoolers interested in volunteering to spread scientific literacy across the globe by publishing popular science articles. Explorers gain access to writing workshops, explore their own STEM interests at their own pace, and receive feedback from experienced researchers, with no deadlines or requirements.</p>
+          <a href="https://forms.gle/KXGDpcg9LW6xcY5y8" class="apply-btn" target="_blank" rel="noopener">
+            Explorers Application
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <div data-component="footer"></div>
+
+  <div data-component="profile-modal"></div>
+
+  <script type="module">
+    import { loadComponents } from '/js/components.js';
+    await loadComponents();
+    await import('/js/main.js');
+    await import('/js/nav-auth.js');
+  </script>
+
+</body>
+</html>

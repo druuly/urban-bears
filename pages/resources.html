@@ -48,6 +48,46 @@
       opacity: .88;
       margin-bottom: 1.6rem;
     }
+
+    .resource-list {
+      max-width: 52rem;
+      margin-inline: auto;
+      display: flex;
+      flex-direction: column;
+      gap: .75rem;
+    }
+    .resource-item {
+      display: flex;
+      flex-direction: column;
+      gap: .3rem;
+      padding: 1.4rem 1.8rem;
+      border: 1.5px solid rgba(255,255,255,.12);
+      border-radius: 1rem;
+      background: rgba(255,255,255,.03);
+      transition: border-color .3s ease, background .3s ease;
+    }
+    .resource-item:hover {
+      border-color: rgba(255,255,255,.28);
+      background: rgba(255,255,255,.06);
+    }
+    .resource-item a {
+      font-family: 'The Seasons', 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.15rem;
+      letter-spacing: .03em;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      transition: opacity .2s ease;
+    }
+    .resource-item a:hover { opacity: .75; }
+    .resource-item a svg { flex-shrink: 0; opacity: .6; }
+    .resource-item span {
+      font-size: .92rem;
+      opacity: .6;
+      line-height: 1.5;
+    }
   </style>
 </head>
 <body>
@@ -73,6 +113,50 @@
 
       <div class="resources-intro reveal">
         <p>Access a curated collection of resources to support your STEM journey. From learning materials to research guides, find everything you need to develop your skills in biomedical engineering and research.</p>
+      </div>
+
+      <div class="resource-list stagger">
+
+        <div class="resource-item">
+          <a href="https://forms.gle/u319YFQyCNJesVuZ8" target="_blank" rel="noopener">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            Chapter Application
+          </a>
+          <span>Apply to start a community or school UrbanBEARS chapter, open to students with a passion for biomedical sciences and leadership.</span>
+        </div>
+
+        <div class="resource-item">
+          <a href="https://forms.gle/XbhJNPSV8aHKXwfF9" target="_blank" rel="noopener">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            UrbanBEARS Mentorship Program
+          </a>
+          <span>A selective research internship where students develop independent biomedical projects under guidance from experienced researchers.</span>
+        </div>
+
+        <div class="resource-item">
+          <a href="https://forms.gle/KXGDpcg9LW6xcY5y8" target="_blank" rel="noopener">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            BEARS Explorers
+          </a>
+          <span>For middle and high schoolers who want to spread scientific literacy by writing popular science articles, with no deadlines or requirements.</span>
+        </div>
+
+        <div class="resource-item">
+          <a href="https://docs.google.com/spreadsheets/d/154Q-eaZ_-TfoFa5huxapC7Mja87NAHhkXK_FNEU3OHo/edit?usp=sharing" target="_blank" rel="noopener">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            Hospital Volunteering Opportunities and Programs
+          </a>
+          <span>A live directory of hospital volunteer programs and clinical shadowing opportunities, currently curated for New York students.</span>
+        </div>
+
+        <div class="resource-item">
+          <a href="https://docs.google.com/spreadsheets/d/1YUpC1cz9nkUOXcZbURdMj4HvFSVHgfyunO2NZVyQSy0/edit?usp=sharing" target="_blank" rel="noopener">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            Research Opportunities and Academic Programs
+          </a>
+          <span>A live collection of undergraduate research programs, internships, and academic opportunities in biomedical sciences and engineering.</span>
+        </div>
+
       </div>
 
     </div>

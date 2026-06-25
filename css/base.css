@@ -312,6 +312,7 @@ nav {
   list-style: none;
   font-family: 'Libre Baskerville', serif;
   font-size: .88rem;
+  align-items: center;
 }
 .nav-links a             { position: relative; padding-bottom: 2px; }
 .nav-links a::after {
@@ -350,7 +351,6 @@ footer {
    NAV AUTH — sign-in button + profile chip
 ══════════════════════════════════════════════ */
 .nav-auth-li {
-  margin-left: auto;
   display: flex;
   align-items: center;
   list-style: none;
@@ -666,6 +666,18 @@ footer {
 /* ══════════════════════════════════════════════
    RESPONSIVE — shared / nav breakpoint
 ══════════════════════════════════════════════ */
+
+/* Desktop: absolutely center nav-links; push donate + auth to the right */
+@media (min-width: 48.0625rem) {
+  .nav-links {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+  .btn-donate { margin-left: auto; }
+}
+
 @media (max-width: 70rem) {
   .btn-donate, .nav-auth-li { display: none; }
 }

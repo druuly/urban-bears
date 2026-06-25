@@ -11,19 +11,37 @@
  */
 
 /* ── Mobile nav ── */
-const hamburger = document.getElementById('hamburger');
-const navLinks  = document.getElementById('nav-links');
+const hamburger  = document.getElementById('hamburger');
+const navLinks   = document.getElementById('nav-links');
+const navAuthLi  = document.getElementById('nav-auth-li');
+const donateBtn  = document.querySelector('.btn-donate');
+
+function isMobileNav() {
+  return window.matchMedia('(max-width: 48rem)').matches;
+}
+
+function closeMobileMenu() {
+  navLinks.classList.remove('open');
+  hamburger.setAttribute('aria-expanded', 'false');
+  if (navAuthLi && navAuthLi.parentElement === navLinks) {
+    donateBtn.after(navAuthLi);
+  }
+}
 
 if (hamburger && navLinks) {
   hamburger.addEventListener('click', () => {
     const open = navLinks.classList.toggle('open');
     hamburger.setAttribute('aria-expanded', String(open));
+    if (open && isMobileNav() && navAuthLi) {
+      navLinks.appendChild(navAuthLi);
+    } else if (!open && navAuthLi && navAuthLi.parentElement === navLinks) {
+      donateBtn.after(navAuthLi);
+    }
   });
 
   document.addEventListener('click', e => {
-    if (!hamburger.contains(e.target) && !navLinks.contains(e.target)) {
-      navLinks.classList.remove('open');
-      hamburger.setAttribute('aria-expanded', 'false');
+    if (!hamburger.contains(e.target) && !navLinks.contains(e.target) && !navAuthLi?.contains(e.target)) {
+      closeMobileMenu();
     }
   });
 }

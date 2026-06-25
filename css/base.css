@@ -347,6 +347,62 @@ footer {
   border-top: 1px solid rgba(255,255,255,.08);
 }
 
+.footer-socials {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: .75rem;
+  margin-bottom: 1.2rem;
+}
+
+.footer-inline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: .75rem 1rem;
+}
+.footer-inline p { margin: 0; }
+
+.social-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  border: 1.5px solid rgba(255,255,255,.3);
+  border-radius: 3rem;
+  padding: .6rem 1.3rem;
+  font-family: 'Libre Baskerville', serif;
+  font-size: .82rem;
+  letter-spacing: .04em;
+  transition: background var(--transition), border-color var(--transition),
+              transform var(--transition), box-shadow var(--transition);
+}
+.social-pill svg { flex-shrink: 0; opacity: .75; transition: opacity var(--transition); }
+.social-pill:hover {
+  background: rgba(255,255,255,.08);
+  border-color: rgba(255,255,255,.6);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(255,255,255,.07);
+}
+.social-pill:hover svg { opacity: 1; }
+
+.social-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  border: 1.5px solid rgba(255,255,255,.3);
+  border-radius: 50%;
+  opacity: .7;
+  transition: opacity var(--transition), border-color var(--transition), transform var(--transition);
+}
+.social-icon-btn:hover {
+  opacity: 1;
+  border-color: rgba(255,255,255,.7);
+  transform: translateY(-2px);
+}
+
 /* ══════════════════════════════════════════════
    NAV AUTH — sign-in button + profile chip
 ══════════════════════════════════════════════ */

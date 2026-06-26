@@ -272,7 +272,7 @@ img { display: block; max-width: 100%; }
 nav {
   position: sticky;
   top: 0;
-  z-index: 1000;
+  z-index: 150;
   background: var(--navy);
   border-bottom: 1px solid rgba(255,255,255,.07);
   animation: slideDown .55s cubic-bezier(.4,0,.2,1) both;

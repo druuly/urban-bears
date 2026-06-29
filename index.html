@@ -192,6 +192,98 @@
   <!-- ── Profile Setup Modal ── -->
   <div data-component="profile-modal"></div>
 
+  <!-- ── Opportunities Toast ── -->
+  <div id="opp-toast" role="alert" aria-live="polite" style="
+    display:none;
+    position:fixed;
+    bottom:1.5rem;
+    left:1.5rem;
+    z-index:9999;
+    max-width:22rem;
+    background:rgba(28,28,66,.65);
+    backdrop-filter:blur(12px);
+    -webkit-backdrop-filter:blur(12px);
+    border:1.5px solid rgba(255,255,255,.18);
+    border-radius:1.1rem;
+    padding:1.1rem 1.4rem;
+    box-shadow:0 8px 32px rgba(0,0,0,.45);
+    color:#fff;
+    font-family:'Libre Baskerville',Georgia,serif;
+    opacity:0;
+    transform:translateY(12px);
+    transition:opacity .38s ease, transform .38s ease;
+  ">
+    <button id="opp-toast-close" aria-label="Dismiss" style="
+      position:absolute;
+      top:.6rem;
+      right:.8rem;
+      background:none;
+      border:none;
+      color:rgba(255,255,255,.5);
+      font-size:1.1rem;
+      cursor:pointer;
+      line-height:1;
+      padding:.1rem .3rem;
+    ">&times;</button>
+    <p style="font-size:.8rem;letter-spacing:.08em;opacity:.6;margin-bottom:.35rem;text-transform:uppercase;">From UrbanBEARS</p>
+    <p style="font-size:.97rem;line-height:1.55;margin-bottom:.85rem;">We just opened up some research internships and STEM opportunities. 100% free, made by students, for students.</p>
+    <a href="/pages/resources.html" class="opp-toast-btn">Explore Opportunities &rarr;</a>
+  <style>
+    .opp-toast-btn {
+      display: inline-block;
+      font-family: 'Libre Baskerville', Georgia, serif;
+      font-size: .88rem;
+      font-weight: 700;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      color: #fff;
+      padding: .55rem 1.3rem;
+      border: 2px solid #fff;
+      border-radius: 3rem;
+      white-space: nowrap;
+      transition: background .28s cubic-bezier(.4,0,.2,1),
+                  color .28s cubic-bezier(.4,0,.2,1),
+                  transform .28s cubic-bezier(.4,0,.2,1),
+                  box-shadow .28s cubic-bezier(.4,0,.2,1);
+    }
+    .opp-toast-btn:hover {
+      background: #fff;
+      color: #12122e;
+      transform: scale(1.05);
+      box-shadow: 0 6px 28px rgba(255,255,255,.16);
+    }
+  </style>
+  </div>
+
+  <script>
+    (function () {
+      var toast  = document.getElementById('opp-toast');
+      var close  = document.getElementById('opp-toast-close');
+      var SEEN_KEY = 'ub_opp_toast_seen';
+      if (!toast || sessionStorage.getItem(SEEN_KEY)) return;
+
+      function hideToast() {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(12px)';
+        setTimeout(function () { toast.style.display = 'none'; }, 400);
+        sessionStorage.setItem(SEEN_KEY, '1');
+      }
+
+      setTimeout(function () {
+        toast.style.display = 'block';
+        requestAnimationFrame(function () {
+          requestAnimationFrame(function () {
+            toast.style.opacity = '1';
+            toast.style.transform = 'translateY(0)';
+          });
+        });
+        setTimeout(hideToast, 9000);
+      }, 3000);
+
+      close.addEventListener('click', hideToast);
+    })();
+  </script>
+
   <script type="module">
     import { loadComponents } from '/js/components.js';
 

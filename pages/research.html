@@ -998,7 +998,12 @@
       padding-top: 1.2rem;
       border-top: 1px solid rgba(255,255,255,.12);
     }
+    /* Same treatment as the nav donate / sign-in buttons: a left-to-right
+       fill wipe plus a slight lift in scale, instead of translating up. */
     .btn-cancel, .btn-publish {
+      position: relative;
+      overflow: hidden;
+      z-index: 0;
       font-family: 'Libre Baskerville', serif;
       font-size: .85rem;
       font-weight: 700;
@@ -1007,24 +1012,45 @@
       padding: .8rem 1.6rem;
       border-radius: var(--radius-btn);
       cursor: pointer;
-      transition: transform var(--transition), background var(--transition),
-                  box-shadow var(--transition);
+      --fill: #ffffff;
+      transition: color .3s ease, border-color .3s ease,
+                  transform var(--transition), box-shadow var(--transition);
     }
+    .btn-cancel::before, .btn-publish::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--fill);
+      transform: translateX(-100%);
+      transition: transform .5s cubic-bezier(.4,0,.2,1);
+      z-index: -1;
+    }
+    .btn-cancel:hover::before,
+    .btn-publish:not(:disabled):hover::before {
+      transform: translateX(0);
+    }
+    .btn-cancel:active, .btn-publish:not(:disabled):active { transform: scale(1.02); }
+
     .btn-cancel {
       background: transparent;
       border: 1.5px solid rgba(255,255,255,.3);
       color: var(--white);
     }
-    .btn-cancel:hover { border-color: var(--white); transform: translateY(-2px); }
+    .btn-cancel:hover {
+      border-color: var(--white);
+      color: var(--navy);
+      transform: scale(1.06);
+      box-shadow: 0 6px 22px rgba(255,255,255,.16);
+    }
     .btn-publish {
       background: var(--lavender-bg);
       color: var(--navy);
       border: 1.5px solid var(--lavender-bg);
     }
-    .btn-publish:hover {
-      background: var(--lavender-lt);
-      transform: translateY(-2px);
-      box-shadow: 0 10px 24px rgba(207,214,245,.2);
+    .btn-publish:not(:disabled):hover {
+      border-color: var(--white);
+      transform: scale(1.06);
+      box-shadow: 0 10px 26px rgba(207,214,245,.28);
     }
     .btn-publish:disabled {
       opacity: .5;
@@ -1058,7 +1084,7 @@
       transform: translateX(-50%) translateY(0);
     }
 
-    /* ── Byline avatar in cards ── */
+    /* ── Card byline ── */
     .card-byline {
       display: flex;
       align-items: center;
@@ -1066,15 +1092,6 @@
       font-size: .78rem;
       font-family: 'Libre Baskerville', serif;
       color: var(--white);
-    }
-    .byline-avatar {
-      width: 1.5rem;
-      height: 1.5rem;
-      border-radius: 50%;
-      border: 1px solid rgba(255,255,255,.25);
-      object-fit: cover;
-      flex-shrink: 0;
-      background: var(--navy-mid);
     }
     .byline-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
@@ -1581,7 +1598,6 @@
           <div class="cover" ${a.coverUrl ? `style="background-image:url('${escapeHtml(a.coverUrl)}')"` : ''}></div>
           <h3>${escapeHtml(a.title || 'Untitled')}</h3>
           <div class="card-byline">
-            ${a.authorPhoto ? `<img class="byline-avatar" src="${escapeHtml(a.authorPhoto)}" alt="" />` : ''}
             <span class="byline-text">${escapeHtml(a.authorName || 'Anonymous')}${a.authorSchool ? ' · ' + escapeHtml(a.authorSchool) : ''} · ${fmtDate(a.createdAt)}</span>
           </div>
         </article>`;
@@ -1591,7 +1607,6 @@
           <div class="cover" ${a.coverUrl ? `style="background-image:url('${escapeHtml(a.coverUrl)}')"` : ''}></div>
           <h2>${escapeHtml(a.title || 'Untitled')}</h2>
           <div class="card-byline">
-            ${a.authorPhoto ? `<img class="byline-avatar" src="${escapeHtml(a.authorPhoto)}" alt="" />` : ''}
             <span class="byline-text">${escapeHtml(a.authorName || 'Anonymous')}${a.authorSchool ? ' · ' + escapeHtml(a.authorSchool) : ''} · ${fmtDate(a.createdAt)}</span>
           </div>
         </article>`;
@@ -1610,7 +1625,6 @@
           <div class="cover" ${a.coverUrl ? `style="background-image:url('${escapeHtml(a.coverUrl)}')"` : ''}></div>
           <h3>${escapeHtml(a.title || 'Untitled')}</h3>
           <div class="card-byline">
-            ${a.authorPhoto ? `<img class="byline-avatar" src="${escapeHtml(a.authorPhoto)}" alt="" />` : ''}
             <span class="byline-text">${escapeHtml(a.authorName || 'Anonymous')}${a.authorSchool ? ' · ' + escapeHtml(a.authorSchool) : ''} · ${fmtDate(a.createdAt)}</span>
           </div>
         </article>`;
@@ -1701,7 +1715,6 @@
               <div class="info">
                 <h3>${escapeHtml(a.title || 'Untitled')}</h3>
                 <div class="row-meta card-byline">
-                  ${a.authorPhoto ? `<img class="byline-avatar" src="${escapeHtml(a.authorPhoto)}" alt="" />` : ''}
                   <span class="byline-text">${escapeHtml(a.authorName || 'Anonymous')}${a.authorSchool ? ' · ' + escapeHtml(a.authorSchool) : ''} · ${fmtDate(a.createdAt)} · URBANBEARS</span>
                 </div>
                 <div class="row-stats">

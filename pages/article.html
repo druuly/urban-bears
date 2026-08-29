@@ -76,15 +76,6 @@
       gap: .8rem;
       margin-bottom: 1.4rem;
     }
-    .article-byline .pub-avatar {
-      width: 2.4rem;
-      height: 2.4rem;
-      border-radius: 50%;
-      background: var(--navy-mid);
-      border: 1px solid rgba(255,255,255,.18);
-      object-fit: cover;
-      flex-shrink: 0;
-    }
     .article-byline .pub-info {
       display: flex;
       flex-direction: column;
@@ -115,7 +106,12 @@
       border-bottom: 1px solid rgba(255,255,255,.1);
       margin-bottom: 2.4rem;
     }
+    /* Each pill carries its own accent colour; the icon takes the accent
+       while the pill fills with the opposite (light) tone on hover/active. */
     .pill-btn {
+      position: relative;
+      overflow: hidden;
+      z-index: 0;
       display: inline-flex;
       align-items: center;
       gap: .4rem;
@@ -127,32 +123,54 @@
       font-family: 'Libre Baskerville', serif;
       font-size: .85rem;
       cursor: pointer;
-      transition: background var(--transition),
-                  border-color var(--transition),
-                  color var(--transition),
-                  transform var(--transition);
+      --accent: var(--lavender-bg);
+      --fill: #ffffff;
+      transition: border-color .3s ease, color .3s ease,
+                  transform var(--transition), box-shadow var(--transition);
     }
-    .pill-btn:hover {
-      border-color: rgba(255,255,255,.4);
-      background: rgba(255,255,255,.04);
+    /* Left-to-right wipe, same feel as the nav donate button */
+    .pill-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--fill);
+      transform: translateX(-100%);
+      transition: transform .45s cubic-bezier(.4,0,.2,1);
+      z-index: -1;
     }
+    .pill-btn:hover::before,
+    .pill-btn.active::before {
+      transform: translateX(0);
+    }
+    .pill-btn:hover,
+    .pill-btn.active {
+      color: var(--navy);
+      border-color: var(--fill);
+      transform: scale(1.08);
+      box-shadow: 0 6px 18px rgba(0,0,0,.28);
+    }
+    .pill-btn:active { transform: scale(1.02); }
     .pill-btn svg {
       width: 1.05rem;
       height: 1.05rem;
       stroke: var(--white);
       fill: none;
       stroke-width: 1.8;
-      transition: fill var(--transition), stroke var(--transition), transform var(--transition);
+      transition: fill .3s ease, stroke .3s ease, transform var(--transition);
     }
-    .pill-btn.active {
-      background: var(--lavender-bg);
-      color: var(--navy);
-      border-color: var(--lavender-bg);
-    }
+    .pill-btn:hover svg,
     .pill-btn.active svg {
-      stroke: var(--navy);
-      fill: var(--navy);
+      stroke: var(--accent);
+      fill: var(--accent);
     }
+    /* Repost / share read better as line icons — keep them unfilled */
+    #action-repost:hover svg, #action-repost.active svg,
+    #action-share:hover svg { fill: none; }
+
+    #action-like   { --accent: #e63950; }
+    #action-repost { --accent: #1faa59; }
+    #action-share  { --accent: #2f80ed; }
+
     .pill-btn.pulse svg { animation: pulse .5s ease; }
     @keyframes pulse {
       0%, 100% { transform: scale(1); }
@@ -170,19 +188,21 @@
     .pill-delete {
       border-color: rgba(255, 100, 100, .35);
       color: #ff9090;
+      --fill: #c83232;
+      --accent: #ffffff;
     }
     .pill-delete svg {
       stroke: #ff9090;
     }
     .pill-delete:hover {
-      background: #c83232;
-      border-color: #c83232;
       color: #fff;
-      transform: translateY(-2px);
-      box-shadow: 0 6px 18px rgba(200, 50, 50, .35);
+      border-color: #c83232;
+      transform: scale(1.08);
+      box-shadow: 0 8px 22px rgba(200, 50, 50, .35);
     }
     .pill-delete:hover svg {
       stroke: #fff;
+      fill: none;
       animation: shake .4s cubic-bezier(.36,.07,.19,.97) both;
     }
     @keyframes shake {
@@ -555,7 +575,6 @@
         <h1 class="article-title">${escapeHtml(a.title || 'Untitled')}</h1>
         <p class="article-subtitle">${subtitle}</p>
         <div class="article-byline">
-          <img class="pub-avatar" src="${escapeHtml(a.authorPhoto || '../assets/images/logo/urbanbearlogo.png')}" alt="${escapeHtml(a.authorName || 'Author')}" onerror="this.src='../assets/images/logo/urbanbearlogo.png'" />
           <div class="pub-info">
             <span class="pub-name">${escapeHtml(a.authorName || 'Anonymous')}</span>
             <span class="pub-date">${a.authorSchool ? escapeHtml(a.authorSchool) + ' · ' : ''}URBANBEARS · ${date}</span>
@@ -571,6 +590,7 @@
             <span class="count" id="repost-count">${a.repostCount || 0}</span>
           </button>
           <button class="pill-btn pill-share" id="action-share" aria-label="Share">
+            <svg viewBox="0 0 24 24" stroke-linejoin="round" stroke-linecap="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="10.6" x2="15.4" y2="6.4"/><line x1="8.6" y1="13.4" x2="15.4" y2="17.6"/></svg>
             <span>Share</span>
           </button>
           <button class="pill-btn pill-delete" id="action-delete" style="display:none;" aria-label="Delete">
@@ -618,22 +638,38 @@
       const subRef = doc(db, 'articles', id, type === 'like' ? 'likes' : 'reposts', state.user.uid);
       const countField = type === 'like' ? 'likeCount' : 'repostCount';
       const btn = $(type === 'like' ? 'action-like' : 'action-repost');
+      const countEl = $(type === 'like' ? 'like-count' : 'repost-count');
+      if (btn.dataset.busy === '1') return;
+      btn.dataset.busy = '1';
+
+      /* Flip the UI immediately — the animation must not wait on Firestore.
+         If the write fails we roll the visual state back below. */
+      const wasActive = btn.classList.contains('active');
+      const delta = wasActive ? -1 : 1;
+      const bump = (n) => {
+        if (!countEl) return;
+        countEl.textContent = Math.max(0, (parseInt(countEl.textContent, 10) || 0) + n);
+      };
+      btn.classList.toggle('active', !wasActive);
+      bump(delta);
+      if (!wasActive) {
+        btn.classList.remove('pulse');
+        void btn.offsetWidth; // restart the animation
+        btn.classList.add('pulse');
+        setTimeout(() => btn.classList.remove('pulse'), 500);
+      }
+
       try {
-        const snap = await getDoc(subRef);
-        if (snap.exists()) {
-          await deleteDoc(subRef);
-          await updateDoc(doc(db, 'articles', id), { [countField]: increment(-1) });
-          btn.classList.remove('active');
-        } else {
-          await setDoc(subRef, { createdAt: serverTimestamp() });
-          await updateDoc(doc(db, 'articles', id), { [countField]: increment(1) });
-          btn.classList.add('active');
-          btn.classList.add('pulse');
-          setTimeout(() => btn.classList.remove('pulse'), 500);
-        }
+        if (wasActive) await deleteDoc(subRef);
+        else await setDoc(subRef, { createdAt: serverTimestamp() });
+        await updateDoc(doc(db, 'articles', id), { [countField]: increment(delta) });
       } catch (e) {
         console.error(e);
+        btn.classList.toggle('active', wasActive);
+        bump(-delta);
         showToast('Action failed');
+      } finally {
+        delete btn.dataset.busy;
       }
     };
 

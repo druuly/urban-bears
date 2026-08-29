@@ -53,17 +53,26 @@ The main content document. Auto-IDed via `addDoc`.
 
 ### Doc-size budget
 
-Firestore caps a doc at ~1 MiB. The composer enforces a soft cap of
-**~850 KB total** before allowing publish to give breathing room. The
-estimate is `(body.length + coverUrl.length) * 0.75` (base64 → byte
-adjustment). Authors get a toast if they exceed it and need to
-remove/shrink images.
+Firestore caps a doc at 1,048,487 bytes. The composer enforces a soft
+cap of **900 KB** for `body + coverUrl`, measured exactly with
+`TextEncoder` (`utf8Bytes`), before allowing publish.
 
-Sizing tips that already happen automatically:
+What happens automatically, in order:
 
 - Cover image: re-encoded JPEG at `maxWidth 1400`, quality `0.82`.
-- Inline images: re-encoded JPEG at `maxWidth 1100`, quality `0.82`.
-- PNGs/GIFs keep PNG to preserve transparency.
+- Toolbar-inserted inline images: JPEG at `maxWidth 1100`, quality
+  `0.82` (PNG/GIF keep PNG to preserve transparency).
+- **Pasted or dropped** images arrive as full-resolution base64 and
+  bypass those handlers, so `squeezeInlineImages()` runs after every
+  paste/drop and re-encodes any embedded `data:` image over 120 KB.
+- At publish, if the doc is still over budget, a harder pass runs
+  (`maxWidth 900`, quality `0.7`, 60 KB threshold, plus a cover
+  re-encode). Only if that fails does the author get a toast telling
+  them the actual size and to drop images / split the article.
+
+Without those passes a single pasted photo can exceed the 1 MiB cap on
+its own and the write fails with
+`FirebaseError: The value of property "body" is longer than 1048487 bytes`.
 
 ## articles/{id}/likes/{uid}
 

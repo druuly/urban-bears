@@ -1479,6 +1479,47 @@
         reader.readAsDataURL(file);
       });
 
+    /* Firestore hard-caps a document at 1,048,487 bytes. Everything the
+       composer writes (body HTML + base64 cover) lives in one doc, so we
+       keep a byte budget with headroom for the metadata fields. */
+    const MAX_INLINE_BYTES = 120 * 1024;   // per inline image
+    const DOC_BYTE_BUDGET  = 900 * 1024;   // body + cover, pre-publish guard
+
+    const utf8Bytes = (s) => new TextEncoder().encode(s || '').length;
+
+    // Decoded byte size of a data: URL without materialising the blob.
+    const dataUrlBytes = (s) => {
+      const i = s.indexOf(',');
+      return i < 0 ? s.length : Math.ceil((s.length - i - 1) * 0.75);
+    };
+
+    // Re-encode an already-embedded data: URL (pasted/dropped images arrive
+    // at full resolution — the toolbar handler is the only path that
+    // compressed them before). Resolves to the original on any failure.
+    const compressDataUrl = (src, maxW = INLINE_MAX_W, quality = QUALITY) =>
+      new Promise((resolve) => {
+        const img = new Image();
+        img.onerror = () => resolve(src);
+        img.onload = () => {
+          try {
+            const scale = Math.min(1, maxW / img.width);
+            const w = Math.max(1, Math.round(img.width * scale));
+            const h = Math.max(1, Math.round(img.height * scale));
+            const canvas = document.createElement('canvas');
+            canvas.width = w; canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            // JPEG has no alpha — flatten onto the editor background so
+            // transparent PNGs don't come out with black fringes.
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, w, h);
+            ctx.drawImage(img, 0, 0, w, h);
+            const out = canvas.toDataURL('image/jpeg', quality);
+            resolve(out.length < src.length ? out : src);
+          } catch { resolve(src); }
+        };
+        img.src = src;
+      });
+
     const quillHtmlToMarkdown = (html) => {
       const tmp = document.createElement('div');
       tmp.innerHTML = html;
@@ -1855,6 +1896,42 @@
     let coverDataUrl = '';
     const tags = new Set();
 
+    /* Walk the editor contents and shrink any oversized embedded image.
+       Runs after every paste/drop and again (harder) at publish time.
+       Returns the number of images it rewrote. */
+    let squeezing = false;
+    const squeezeInlineImages = async ({
+      maxW = INLINE_MAX_W,
+      quality = QUALITY,
+      threshold = MAX_INLINE_BYTES,
+    } = {}) => {
+      if (!quill || squeezing) return 0;
+      squeezing = true;
+      try {
+        const delta = quill.getContents();
+        const targets = delta.ops.filter(op =>
+          typeof op?.insert?.image === 'string' &&
+          op.insert.image.startsWith('data:image') &&
+          dataUrlBytes(op.insert.image) > threshold
+        );
+        if (!targets.length) return 0;
+        showToast(`Optimising ${targets.length} image${targets.length > 1 ? 's' : ''}…`);
+        let changed = 0;
+        for (const op of targets) {
+          const out = await compressDataUrl(op.insert.image, maxW, quality);
+          if (out !== op.insert.image) { op.insert.image = out; changed++; }
+        }
+        if (!changed) return 0;
+        const sel = quill.getSelection();
+        quill.setContents(delta, 'silent');
+        if (sel) quill.setSelection(sel.index, sel.length, 'silent');
+        scheduleAutoSave();
+        return changed;
+      } finally {
+        squeezing = false;
+      }
+    };
+
     const initQuill = () => {
       if (quill) return;
       const toolbar = [
@@ -1920,6 +1997,12 @@
         if (range.length) quill.deleteText(range.index, range.length, 'user');
         quill.clipboard.dangerouslyPasteHTML(range.index, rendered, 'user');
       }, true);
+
+      // Rich pastes and drops carry full-resolution base64 images straight
+      // into the document; compress them once Quill has applied the delta.
+      const squeezeSoon = () => setTimeout(() => { squeezeInlineImages(); }, 0);
+      quill.root.addEventListener('paste', squeezeSoon);
+      quill.root.addEventListener('drop', squeezeSoon);
     };
 
     const resetComposer = () => {
@@ -2253,9 +2336,9 @@
       }
       const title = els.compTitle.value.trim();
       const subtitle = els.compSubtitle.value.trim();
-      const rawHtml = quill.root.innerHTML;
-      const markdownified = marked.parse(quillHtmlToMarkdown(rawHtml));
-      const body = DOMPurify.sanitize(markdownified);
+      const buildBody = () =>
+        DOMPurify.sanitize(marked.parse(quillHtmlToMarkdown(quill.root.innerHTML)));
+      let body = buildBody();
       if (!title) { showToast('Title required'); return; }
       if (!coverDataUrl) { showToast('Cover image required'); els.coverDropzone.style.outline = '2px solid rgba(255,160,160,.7)'; return; }
       els.coverDropzone.style.outline = '';
@@ -2267,6 +2350,35 @@
       }
       els.tagInputWrap.style.borderColor = '';
       if (quill.getText().trim().length < 1) { showToast('Body required'); return; }
+
+      /* Doc-size guard — Firestore rejects anything over 1,048,487 bytes and
+         the whole article (body HTML + base64 cover) is one document. Try a
+         harder image pass first, then refuse with an actionable message
+         rather than letting the write blow up in the console. */
+      let docBytes = utf8Bytes(body) + utf8Bytes(coverDataUrl);
+      if (docBytes > DOC_BYTE_BUDGET) {
+        els.btnPublish.disabled = true;
+        els.btnPublish.textContent = 'Optimising…';
+        await squeezeInlineImages({ maxW: 900, quality: 0.7, threshold: 60 * 1024 });
+        if (dataUrlBytes(coverDataUrl) > 180 * 1024) {
+          coverDataUrl = await compressDataUrl(coverDataUrl, COVER_MAX_W, 0.7);
+          els.coverDropzone.style.backgroundImage = `url('${coverDataUrl}')`;
+        }
+        body = buildBody();
+        docBytes = utf8Bytes(body) + utf8Bytes(coverDataUrl);
+        els.btnPublish.disabled = false;
+        els.btnPublish.textContent = 'Publish';
+      }
+      if (docBytes > DOC_BYTE_BUDGET) {
+        const imgCount = (body.match(/<img\b/gi) || []).length;
+        showToast(
+          `Article is ${(docBytes / 1048576).toFixed(2)} MB — the limit is 1 MB. ` +
+          (imgCount
+            ? `Remove some of the ${imgCount} inline image${imgCount > 1 ? 's' : ''} and try again.`
+            : 'Split it into shorter parts and try again.')
+        );
+        return;
+      }
 
       els.btnPublish.disabled = true;
       els.btnPublish.textContent = 'Publishing…';

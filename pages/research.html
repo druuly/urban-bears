@@ -936,23 +936,100 @@
     #editor {
       min-height: 22rem;
       background: rgba(255,255,255,.06);
-      border-radius: 0 0 .8rem .8rem;
+      border-radius: .8rem;
       color: var(--white);
       font-family: 'Libre Baskerville', serif;
       font-size: 1rem;
       line-height: 1.8;
     }
-    .ql-toolbar.ql-snow {
-      background: rgba(255,255,255,.06);
-      border: 1.5px solid rgba(255,255,255,.18) !important;
-      border-radius: .8rem .8rem 0 0;
-    }
     .ql-container.ql-snow {
       border: 1.5px solid rgba(255,255,255,.18) !important;
-      border-top: none !important;
-      border-radius: 0 0 .8rem .8rem;
+      border-radius: .8rem;
       font-family: 'Libre Baskerville', serif;
     }
+
+    /* ── Docked editor toolbar ──
+       The toolbar is moved out of the modal (see initQuill) and parked in a
+       fixed dock at the bottom of the viewport, so it stays reachable while
+       writing long articles. It can't live inside .overlay: that element has
+       a backdrop-filter, which makes it the containing block for fixed
+       children — they'd scroll with the modal instead of staying put. */
+    #toolbar-dock {
+      position: fixed;
+      left: 0; right: 0; bottom: 0;
+      z-index: 210; /* above .overlay (200), below crop (250) / confirm (260) */
+      display: none;
+      justify-content: center;
+      padding: 0 1rem calc(1rem + env(safe-area-inset-bottom, 0px));
+      pointer-events: none;
+    }
+    #toolbar-dock.show { display: flex; }
+    #toolbar-dock .ql-toolbar.ql-snow {
+      pointer-events: auto;
+      width: min(54rem, 100%);
+      box-sizing: border-box;
+      display: flex;
+      flex-wrap: nowrap;
+      align-items: center;
+      justify-content: center;
+      gap: .3rem;
+      /* No overflow/scroll here: `overflow-x: auto` forces overflow-y to
+         `auto` too, which clips the upward-opening picker dropdowns. The bar
+         wraps to a second row on narrow screens instead of scrolling. */
+      overflow: visible;
+      padding: .75rem 1.1rem;
+      background: rgba(64,64,74,.5);
+      backdrop-filter: blur(18px) saturate(.85);
+      -webkit-backdrop-filter: blur(18px) saturate(.85);
+      border: 1.5px solid rgba(255,255,255,.16) !important;
+      border-radius: 999px;
+      box-shadow: 0 .8rem 2rem rgba(0,0,0,.35);
+      animation: toolbarIn .28s cubic-bezier(.4,0,.2,1) both;
+    }
+    /* Scale the controls up — the default snow sizing is cramped for a
+       standalone bar that's meant to be a persistent target. */
+    #toolbar-dock .ql-toolbar.ql-snow button {
+      width: 2.1rem;
+      height: 2.1rem;
+      padding: .3rem;
+    }
+    #toolbar-dock .ql-snow .ql-picker {
+      height: 2.1rem;
+      font-size: .95rem;
+    }
+    #toolbar-dock .ql-snow .ql-picker-label { padding-left: .5rem; }
+    #toolbar-dock .ql-formats {
+      display: inline-flex;
+      align-items: center;
+      margin-right: 0 !important;
+      padding-right: .5rem;
+      border-right: 1px solid rgba(255,255,255,.16);
+    }
+    #toolbar-dock .ql-formats:last-child {
+      border-right: none;
+      padding-right: 0;
+    }
+    #toolbar-dock .ql-formats + .ql-formats { padding-left: .5rem; }
+    #toolbar-dock button:hover,
+    #toolbar-dock .ql-picker-label:hover { background: rgba(255,255,255,.14); border-radius: .5rem; }
+    @keyframes toolbarIn {
+      from { opacity: 0; transform: translateY(1rem); }
+      to   { opacity: 1; transform: none; }
+    }
+    /* Dropdowns must open upward — there's no room below a bottom-docked bar */
+    #toolbar-dock .ql-snow .ql-picker-options {
+      top: auto !important;
+      bottom: 100%;
+      margin-bottom: .6rem;
+      padding: .5rem .75rem;
+      border-radius: .7rem;
+      background: rgba(48,48,58,.94) !important;
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      box-shadow: 0 .5rem 1.5rem rgba(0,0,0,.5);
+    }
+    /* Keep the Publish / Cancel row clear of the docked bar */
+    #composer-overlay.toolbar-docked { padding-bottom: 8.5rem; }
     .ql-snow .ql-stroke { stroke: var(--white) !important; }
     .ql-snow .ql-fill   { fill: var(--white) !important; }
     .ql-snow .ql-picker-label { color: var(--white) !important; }
@@ -1199,6 +1276,13 @@
       .archive-row .cover { width: 6rem; }
       .composer form, .composer .composer-header { padding-inline: 1.6rem; }
       .overlay { padding: 5rem 1rem 2rem; }
+      /* Too many controls for one row — wrap rather than scroll, so the
+         picker dropdowns stay unclipped. */
+      #toolbar-dock .ql-toolbar.ql-snow {
+        flex-wrap: wrap;
+        row-gap: .4rem;
+        border-radius: 1.4rem;
+      }
       footer .container,
       footer p { text-align: center; }
     }
@@ -1316,6 +1400,9 @@
       </form>
     </div>
   </div>
+
+  <!-- Fixed home for the Quill toolbar while the composer is open -->
+  <div id="toolbar-dock" aria-label="Formatting toolbar"></div>
 
   <!-- ─── CONFIRM EXIT OVERLAY ─── -->
   <div class="overlay" id="confirm-exit-overlay" role="dialog" aria-hidden="true">
@@ -1480,15 +1567,28 @@
       clearTimeout(showToast._t);
       showToast._t = setTimeout(() => els.toast.classList.remove('show'), 2400);
     };
+    // The docked toolbar shows only while the composer is open and nothing
+    // is stacked on top of it (crop / confirm-exit modals).
+    const syncToolbarDock = () => {
+      const dock = document.getElementById('toolbar-dock');
+      if (!dock || !dock.firstElementChild) return;
+      const composerOpen = els.composerOverlay.classList.contains('open');
+      const blocked = ['crop-overlay', 'confirm-exit-overlay']
+        .some((id) => document.getElementById(id)?.classList.contains('open'));
+      dock.classList.toggle('show', composerOpen && !blocked);
+      els.composerOverlay.classList.toggle('toolbar-docked', composerOpen && !blocked);
+    };
     const openOverlay = (overlay) => {
       overlay.classList.add('open');
       overlay.setAttribute('aria-hidden', 'false');
       document.body.style.overflow = 'hidden';
+      syncToolbarDock();
     };
     const closeOverlay = (overlay) => {
       overlay.classList.remove('open');
       overlay.setAttribute('aria-hidden', 'true');
       document.body.style.overflow = '';
+      syncToolbarDock();
     };
 
     /* ════════════════════════════════════════════════════════
@@ -1770,6 +1870,14 @@
         placeholder: 'Paste your article here. Any markdown or formatting should automatically render.',
         modules: { toolbar }
       });
+
+      // Relocate the toolbar into the fixed bottom dock. Quill keeps its
+      // handlers bound to the node, so moving it in the DOM is safe.
+      const toolbarEl = document.querySelector('.composer .ql-toolbar');
+      if (toolbarEl) {
+        document.getElementById('toolbar-dock').appendChild(toolbarEl);
+        syncToolbarDock();
+      }
 
       // Custom image handler — compresses client-side and embeds as data URL
       // (No Firebase Storage — keeps the app on the free Spark plan.)

@@ -6,8 +6,10 @@
  *   2. Scroll reveal — IntersectionObserver adds .visible to .reveal and
  *      .stagger elements as they enter the viewport; CSS in animations.css
  *      handles the actual transitions.
- *
- * No dependencies — vanilla JS only.
+ *   3. Author-only nav — reveals the Analytics link and stamps lastActiveAt.
+ *      This lives here because every page imports main.js, while the auth
+ *      bar itself is handled per-page (nav-auth.js, or inline on
+ *      research.html / article.html).
  */
 
 /* ── Mobile nav ── */
@@ -57,3 +59,28 @@ const observer = new IntersectionObserver((entries) => {
 }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
 
 document.querySelectorAll('.reveal, .stagger').forEach(el => observer.observe(el));
+
+/* ── Author-only nav + activity stamp ── */
+const analyticsLi = document.getElementById('nav-analytics-li');
+
+(async () => {
+  try {
+    const { auth } = await import('/js/firebase.js');
+    const { onAuthStateChanged } = await import(
+      'https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js'
+    );
+    const { isAuthor, touchUserActivity } = await import('/js/analytics.js');
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        if (analyticsLi) analyticsLi.hidden = true;
+        return;
+      }
+      touchUserActivity(user);
+      const author = await isAuthor(user.uid);
+      if (analyticsLi) analyticsLi.hidden = !author;
+    });
+  } catch (e) {
+    /* Auth is optional for browsing; a failure here just leaves the link hidden. */
+  }
+})();

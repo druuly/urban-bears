@@ -2,19 +2,54 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    function isAuthor() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/authors/$(request.auth.uid));
+    }
+
     match /users/{uid} {
-      allow read: if request.auth != null && request.auth.uid == uid;
-      allow create, update: if request.auth != null
+      function hasProfileFields() {
+        return request.resource.data.keys().hasAll(['firstName', 'lastName', 'schoolName'])
+          && request.resource.data.firstName is string
+          && request.resource.data.lastName is string
+          && request.resource.data.schoolName is string;
+      }
+      function onlyActivity() {
+        return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastActiveAt']);
+      }
+
+      // Own doc, or any doc if you're an author (the analytics dashboard
+      // needs to count users and measure recent activity).
+      allow read: if request.auth != null && (request.auth.uid == uid || isAuthor());
+
+      allow create: if request.auth != null
         && request.auth.uid == uid
-        && request.resource.data.keys().hasAll(['firstName', 'lastName', 'schoolName'])
-        && request.resource.data.firstName is string
-        && request.resource.data.lastName is string
-        && request.resource.data.schoolName is string;
+        && (hasProfileFields() || request.resource.data.keys().hasOnly(['lastActiveAt']));
+
+      allow update: if request.auth != null
+        && request.auth.uid == uid
+        && (hasProfileFields() || onlyActivity());
     }
 
     match /authors/{uid} {
       allow read: if true;
       allow write: if false;  // manage authors via console only
+    }
+
+    // Append-only engagement log. Every doc is one action at one moment,
+    // which is what makes time-windowed analytics possible; the counters on
+    // the article doc stay the source of truth for lifetime totals.
+    match /events/{eventId} {
+      allow read: if isAuthor();
+
+      allow create: if request.resource.data.keys().hasOnly(['type', 'articleId', 'uid', 'createdAt'])
+        && request.resource.data.type in ['view', 'like', 'unlike', 'repost', 'unrepost']
+        && request.resource.data.articleId is string
+        && request.resource.data.articleId.size() < 200
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.uid == (request.auth == null ? '' : request.auth.uid);
+
+      allow update, delete: if false;
     }
 
     match /articles/{articleId} {

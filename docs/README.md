@@ -9,13 +9,15 @@ Documentation for the Urban BEARS website, focused on the
 | --- | --- |
 | [research-journal.md](./research-journal.md) | System overview — architecture, page layout, runtime flow, key files. Read this first. |
 | [firebase-setup.md](./firebase-setup.md) | One-time Firebase project setup: enabling Auth, creating Firestore, pasting security rules, adding an author. |
-| [data-model.md](./data-model.md) | Firestore collection shapes (`articles`, `authors`, `likes`, `reposts`) and security-rule reference. |
+| [data-model.md](./data-model.md) | Firestore collection shapes (`articles`, `authors`, `users`, `events`, `likes`, `reposts`) and security-rule reference. |
+| [analytics.md](./analytics.md) | The author-only analytics dashboard: what it measures, where each number comes from, and how to add a metric. |
 | [authoring-guide.md](./authoring-guide.md) | How an authorized author writes, formats, and publishes an article. |
 
 ## Quick links
 
 - **Site entry:** `index.html`
 - **Research journal:** `pages/research.html`
+- **Analytics dashboard (authors only):** `pages/analytics.html`
 - **Firestore rules (deployed via console):** `firestore.rules`
 - **Shared styles:** `css/base.css`, `css/animations.css`
 - **Shared JS:** `js/main.js`

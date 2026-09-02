@@ -483,6 +483,7 @@
     import { app, auth, db, signIn, signOut, signInErrorMessage } from '/js/firebase.js';
     import { articleAuthorName, articleAuthorSchool } from '/js/articles.js';
     import { checkAndShowProfileModal } from '/js/profile-modal.js';
+    import { logEvent } from '/js/analytics.js';
 
     /* Shared components (nav, footer, profile modal) must be in the DOM
        before any code below queries it. */
@@ -666,6 +667,12 @@
         if (wasActive) await deleteDoc(subRef);
         else await setDoc(subRef, { createdAt: serverTimestamp() });
         await updateDoc(doc(db, 'articles', id), { [countField]: increment(delta) });
+        logEvent(
+          type === 'like'
+            ? (wasActive ? 'unlike' : 'like')
+            : (wasActive ? 'unrepost' : 'repost'),
+          id
+        );
       } catch (e) {
         console.error(e);
         btn.classList.toggle('active', wasActive);
@@ -749,6 +756,7 @@
 
       updateDoc(doc(db, 'articles', state.articleId), { viewCount: increment(1) })
         .catch(() => {});
+      logEvent('view', state.articleId);
     };
 
     loadArticle();

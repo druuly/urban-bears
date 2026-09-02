@@ -9,6 +9,10 @@ read of the security rules.
 ```
 authors/
   {uid}
+users/
+  {uid}
+events/
+  {eventId}
 articles/
   {articleId}
     likes/
@@ -30,6 +34,49 @@ ID is the Firebase Auth UID.
 
 Anything else you add is ignored by the client. The mere **existence**
 of `authors/{uid}` is what grants author privileges.
+
+## users/{uid}
+
+Every signed-in reader. Created by the profile modal
+(`js/profile-modal.js`), then kept warm by `touchUserActivity()` in
+`js/analytics.js`.
+
+| Field | Type | Set by | Notes |
+| --- | --- | --- | --- |
+| `firstName` | string | profile modal | Required by the rules on any profile write. |
+| `lastName` | string | profile modal | Required. |
+| `schoolName` | string | profile modal | Required. |
+| `uid` | string | profile modal | Mirror of the doc ID. |
+| `email` | string | profile modal | From the auth user. |
+| `digestOptIn` | bool | profile modal | Newsletter checkbox. |
+| `lastActiveAt` | Timestamp | `main.js` | Stamped on every page load once auth resolves. Powers the active-user counts on the analytics dashboard. |
+
+`lastActiveAt` is writable on its own, so a user who signs in but never
+finishes the profile modal still gets a doc (with only that field). The
+dashboard counts those docs too, since they are real accounts.
+
+## events/{eventId}
+
+Append-only log of engagement actions. The counters on the article doc
+are lifetime running totals with no time dimension, so anything
+windowed ("views this week", "likes in the last 30 days") is answered
+from here instead. Written by `logEvent()` in `js/analytics.js`.
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| `type` | string | One of `view`, `like`, `unlike`, `repost`, `unrepost`. Enforced by the rules. |
+| `articleId` | string | The article the action was on. |
+| `uid` | string | The actor, or `''` for signed-out readers. Must match `request.auth.uid`. |
+| `createdAt` | Timestamp | Must equal `request.time`, so it cannot be backdated. |
+
+Nobody can update or delete an event, and only authors can read the
+collection. A like followed by an unlike nets to zero when summarized,
+which keeps windowed numbers consistent with the article counter.
+
+Writes are best-effort and never block the page. `logEvent()` waits for
+the first `onAuthStateChanged` callback before writing, because
+`auth.currentUser` is still null for a beat after page load and the
+event would otherwise be attributed to nobody.
 
 ## articles/{articleId}
 
@@ -93,6 +140,14 @@ Source: `firestore.rules`.
 
 ```
 authors/{uid}         read: anyone;            write: nobody (console only)
+users/{uid}           read: own doc, OR any doc if authors/{requester} exists;
+                      create/update: own doc only, and either a full profile
+                                     write or a lastActiveAt-only write;
+events/{id}           read: authors only;
+                      create: anyone, but only with a valid type/articleId,
+                              uid == request.auth.uid (or '' when signed out),
+                              and createdAt == request.time;
+                      update/delete: nobody;
 articles/{id}         read: anyone;
                       create: signed in
                               AND authors/{uid} exists
@@ -116,6 +171,7 @@ or the increment write will be denied.
 | `loadArticles` | `query(articles, orderBy('createdAt','desc'), limit(60))` — single fetch, sorted, capped at 60. Powers both home and archive after client-side reshuffle. |
 | `openReader` | `onSnapshot(doc(articles, id))` — live binding for engagement counters while a reader is open. |
 | Engagement toggle | `getDoc` → `deleteDoc`/`setDoc` on the `likes`/`reposts` subdoc, then `updateDoc` with `increment(±1)` on the parent. |
+| Analytics dashboard | `query(events, orderBy('createdAt','desc'), limit(5000))`, with an optional `where('createdAt','>=',since)` when a window is requested — one fetch, aggregated in memory for both the site-wide numbers and each article, so no composite index is needed. Plus `getDocs(users)` and the usual article list. |
 
 If `state.articles.length` ever needs to exceed 60, raise the `limit`
 or paginate with `startAfter(lastDoc.createdAt)`.

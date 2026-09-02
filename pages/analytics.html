@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Analytics — Urban BEARS</title>
+  <meta name="robots" content="noindex" />
+
+  <link href="https://fonts.cdnfonts.com/css/the-seasons" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="../css/base.css" />
+  <link rel="stylesheet" href="../css/animations.css" />
+  <style>
+    :root {
+      --a-blue:   #8fb3e8;
+      --a-lav:    #a596ea;
+      --a-teal:   #7fc6b4;
+      --a-panel:  #2c3049;
+    }
+
+    .page-content { padding: 3rem 0 6rem; }
+
+    .page-title {
+      font-family: 'The Seasons', 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(2.4rem, 5vw, 4rem);
+      letter-spacing: .06em;
+      margin-bottom: .35rem;
+    }
+    .page-sub { font-size: .95rem; }
+
+    .a-head {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 1rem 1.5rem;
+      margin-bottom: 2.25rem;
+    }
+
+    .a-section-title { font-size: 1.15rem; font-weight: 700; margin: 2.75rem 0 .35rem; }
+    .a-section-note { font-size: .88rem; margin-bottom: 1rem; }
+
+    /* ── Two-column layout: stats on the left, chart in the space this
+       frees up on the right. Collapses to one column on narrow screens. ── */
+    .a-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 1.5rem 2.5rem;
+      align-items: stretch;
+    }
+    .a-col > .a-section-title:first-child { margin-top: 0; }
+    /* Stretches to the height of the stats column so the chart fills the
+       space rather than leaving a gap beneath it. */
+    .a-col-chart { display: flex; flex-direction: column; min-width: 0; }
+
+    /* ── Stat panels ── */
+    .a-stats {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: .75rem;
+    }
+    /* Full-width rows outside the two-column layout keep flowing rightwards. */
+    .a-stats.wide { grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); }
+    .a-stat {
+      background: var(--a-panel);
+      border: 1.5px solid var(--a-teal);
+      border-radius: .5rem;
+      padding: 1.05rem 1.2rem 1.15rem;
+    }
+    .a-stats[data-accent="blue"]  .a-stat { border-color: var(--a-blue); }
+    .a-stats[data-accent="lav"]   .a-stat { border-color: var(--a-lav); }
+    .a-stats[data-accent="teal"]  .a-stat { border-color: var(--a-teal); }
+
+    .a-stat .label {
+      display: block;
+      font-size: .88rem;
+      margin-bottom: .45rem;
+    }
+    .a-stat .value {
+      font-size: 1.9rem;
+      line-height: 1.15;
+      font-variant-numeric: tabular-nums;
+    }
+    .a-stats[data-accent="blue"]  .a-stat .value { color: var(--a-blue); }
+    .a-stats[data-accent="lav"]   .a-stat .value { color: var(--a-lav); }
+    .a-stats[data-accent="teal"]  .a-stat .value { color: var(--a-teal); }
+    .a-stat .sub { display: block; font-size: .82rem; margin-top: .35rem; }
+
+    /* ── Chart ── */
+    /* No padding: the SVG owns its own insets, so its viewBox can match the
+       element's pixel box exactly and the drawing never has to distort. */
+    .a-chart {
+      flex: 1;
+      min-height: 18rem;
+      background: var(--a-panel);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: .5rem;
+      overflow: hidden;
+    }
+    .a-chart svg { width: 100%; height: 100%; display: block; }
+    .a-chart .grid  { stroke: rgba(255,255,255,.1); stroke-width: 1; }
+    .a-chart .axis  { stroke: rgba(255,255,255,.25); stroke-width: 1; }
+    .a-chart .tick  { fill: var(--white); font-size: 12px; }
+    .a-chart .a-axis-title { fill: var(--white); font-size: 13px; }
+    .a-chart .line  { fill: none; stroke: var(--a-blue); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+    .a-chart .area  { fill: rgba(143,179,232,.14); }
+    .a-chart .dot   { fill: var(--a-blue); }
+
+    /* ── Custom dropdown ── */
+    .a-control { display: flex; align-items: center; gap: .55rem; font-size: .9rem; }
+
+    .a-dd { position: relative; }
+    .a-dd-btn {
+      display: flex;
+      align-items: center;
+      gap: .8rem;
+      font-family: inherit;
+      font-size: .9rem;
+      color: var(--white);
+      background: var(--a-panel);
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: .4rem;
+      padding: .5rem .75rem;
+      cursor: pointer;
+      min-width: 10.5rem;
+      justify-content: space-between;
+      transition: border-color var(--transition), background var(--transition);
+    }
+    .a-dd-btn:hover { border-color: rgba(255,255,255,.4); }
+    .a-dd-btn:focus-visible { outline: 2px solid var(--a-blue); outline-offset: 1px; }
+    .a-dd-caret { flex: none; transition: transform var(--transition); }
+    .a-dd.open .a-dd-caret { transform: rotate(180deg); }
+    .a-dd.open .a-dd-btn { border-color: var(--a-blue); }
+
+    .a-dd-list {
+      position: absolute;
+      z-index: 20;
+      top: calc(100% + .3rem);
+      right: 0;
+      min-width: 100%;
+      list-style: none;
+      background: #383d5c;
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: .4rem;
+      padding: .25rem;
+      box-shadow: 0 .8rem 1.6rem rgba(0,0,0,.45);
+      /* Driven by .a-dd.open rather than [hidden] so it can animate.
+         visibility keeps it out of the tab order and the a11y tree. */
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-.4rem) scale(.97);
+      transform-origin: top right;
+      transition: opacity .15s ease,
+                  transform .15s cubic-bezier(.4,0,.2,1),
+                  visibility 0s linear .15s;
+    }
+    .a-dd.open .a-dd-list {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0) scale(1);
+      transition: opacity .15s ease,
+                  transform .15s cubic-bezier(.4,0,.2,1),
+                  visibility 0s;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .a-dd-list, .a-dd-caret { transition: none; }
+    }
+    .a-dd-opt {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: .45rem .6rem;
+      border-radius: .3rem;
+      font-size: .9rem;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .a-dd-opt:hover, .a-dd-opt.active { background: rgba(143,179,232,.18); }
+    .a-dd-opt[aria-selected="true"] { color: var(--a-blue); }
+    .a-dd-opt .check { opacity: 0; flex: none; }
+    .a-dd-opt[aria-selected="true"] .check { opacity: 1; }
+
+    /* ── Table ── */
+    .a-table-wrap {
+      margin-top: 1rem;
+      overflow-x: auto;
+      background: var(--a-panel);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: .5rem;
+    }
+    table.a-table { width: 100%; border-collapse: collapse; font-size: .93rem; min-width: 44rem; }
+    .a-table th, .a-table td {
+      text-align: right;
+      padding: .8rem .9rem;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+    .a-table thead th {
+      font-size: .88rem;
+      font-weight: 700;
+      color: var(--white);
+      background: rgba(255,255,255,.05);
+      border-bottom-color: rgba(255,255,255,.16);
+    }
+    .a-table th:first-child, .a-table td:first-child {
+      text-align: left;
+      white-space: normal;
+      min-width: 16rem;
+    }
+    .a-table tbody tr:last-child td { border-bottom: none; }
+    .a-table tbody tr { cursor: pointer; transition: background var(--transition); }
+    .a-table tbody tr:hover, .a-table tbody tr:focus-visible {
+      background: rgba(143,179,232,.1);
+      outline: none;
+    }
+    .a-title-cell { font-weight: 700; }
+    .a-title-cell .meta {
+      display: block;
+      font-weight: 400;
+      font-size: .84rem;
+      color: var(--white);
+      margin-top: .2rem;
+    }
+
+    /* ── Detail view ── */
+    .a-back {
+      display: inline-block;
+      font-size: .9rem;
+      color: var(--a-blue);
+      margin-bottom: 1.25rem;
+      border-bottom: 1px solid rgba(143,179,232,.5);
+      padding-bottom: 1px;
+    }
+    .a-detail-title { font-size: clamp(1.6rem, 3.2vw, 2.4rem); line-height: 1.25; margin-bottom: .4rem; }
+    .a-detail-meta { font-size: .92rem; }
+    .a-detail-meta a { color: var(--a-blue); border-bottom: 1px solid rgba(143,179,232,.5); }
+
+    /* ── States ── */
+    .a-message { max-width: 34rem; margin: 5rem auto; text-align: center; }
+    .a-message h2 { font-size: 1.5rem; margin-bottom: .6rem; }
+    .a-message p { font-size: .98rem; }
+    .a-empty { padding: 2rem 0; }
+
+    @media (max-width: 64rem) {
+      .a-layout { grid-template-columns: minmax(0, 1fr); }
+      .a-col-chart > .a-section-title { margin-top: 2.75rem; }
+      .a-chart { min-height: 20rem; }
+    }
+
+    @media (max-width: 48rem) {
+      .a-stat .value { font-size: 1.55rem; }
+      .a-stats { grid-template-columns: minmax(0, 1fr); }
+      .a-dd-btn { min-width: 9rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div data-component="nav"></div>
+
+  <section class="page-content">
+    <div class="container">
+      <div id="analytics-root">
+        <p class="a-empty">Loading…</p>
+      </div>
+    </div>
+  </section>
+
+  <div data-component="footer"></div>
+
+  <!-- ── Profile Setup Modal ── -->
+  <div data-component="profile-modal"></div>
+
+  <script type="module">
+    import { loadComponents } from '/js/components.js';
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
+    import { auth } from '/js/firebase.js';
+    import { fetchArticles, articleAuthorName, articleAuthorSchool } from '/js/articles.js';
+    import {
+      DAY_MS, isAuthor, fetchUsers, fetchEvents,
+      summarize, summarizeByArticle, EMPTY_SUMMARY,
+      dailyViews, countActiveUsers, earliestEvent
+    } from '/js/analytics.js';
+
+    await loadComponents();
+    await import('/js/main.js');
+    await import('/js/nav-auth.js');
+
+    const root = document.getElementById('analytics-root');
+
+    const state = {
+      articles: [],
+      users: [],
+      events: [],
+      window: 'all',          // 'all' | '30' | '7'
+      sort: 'views',
+      articleId: new URLSearchParams(location.search).get('id'),
+    };
+
+    const WINDOWS = [
+      { value: 'all', label: 'All time' },
+      { value: '30',  label: 'Last 30 days' },
+      { value: '7',   label: 'Last 7 days' },
+    ];
+
+    const SORTS = [
+      { value: 'views',  label: 'Most views' },
+      { value: 'likes',  label: 'Most likes' },
+      { value: 'shares', label: 'Most shares' },
+      { value: 'recent', label: 'Newest first' },
+      { value: 'oldest', label: 'Oldest first' },
+    ];
+
+    const esc = (s = '') => String(s).replace(/[&<>"']/g, c =>
+      ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+    const num = (n) => (n || 0).toLocaleString();
+    const toDate = (ts) => ts?.toDate?.() || null;
+
+    const fmtDate = (d) => d
+      ? d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
+      : 'Unpublished';
+
+    const fmtDay = (d) =>
+      d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+
+    /* null for all time, otherwise a day count. */
+    const windowDays = () => (state.window === 'all' ? null : Number(state.window));
+    const windowLabel = () =>
+      state.window === 'all' ? 'all time' : `last ${state.window} days`;
+
+    /* The daily chart follows the selected window. All time spans from the
+       first logged event, capped so the x axis stays readable. */
+    function chartDays() {
+      const days = windowDays();
+      if (days) return days;
+      const first = earliestEvent(state.events);
+      if (!first) return 14;
+      const span = Math.ceil((Date.now() - first.getTime()) / DAY_MS) + 1;
+      return Math.min(90, Math.max(7, span));
+    }
+
+    /* ── Fragments ── */
+
+    const statBlock = (accent, stats, { wide = false } = {}) => `
+      <div class="a-stats${wide ? ' wide' : ''}" data-accent="${accent}">
+        ${stats.map(s => `
+          <div class="a-stat">
+            <span class="label">${esc(s.label)}</span>
+            <span class="value">${esc(s.value)}</span>
+            ${s.sub ? `<span class="sub">${esc(s.sub)}</span>` : ''}
+          </div>
+        `).join('')}
+      </div>`;
+
+    const CARET = `<svg class="a-dd-caret" width="12" height="12" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"
+      aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>`;
+
+    const CHECK = `<svg class="check" width="13" height="13" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"
+      aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>`;
+
+    function dropdown(id, label, options, selected) {
+      const current = options.find(o => o.value === selected) || options[0];
+      return `
+        <div class="a-control">
+          <span class="a-dd-label" id="${id}-label">${esc(label)}</span>
+          <div class="a-dd" id="${id}">
+            <button type="button" class="a-dd-btn" aria-haspopup="listbox"
+                    aria-expanded="false" aria-labelledby="${id}-label ${id}-value">
+              <span class="a-dd-value" id="${id}-value">${esc(current.label)}</span>
+              ${CARET}
+            </button>
+            <ul class="a-dd-list" role="listbox" aria-labelledby="${id}-label">
+              ${options.map(o => `
+                <li class="a-dd-opt" role="option" data-value="${esc(o.value)}"
+                    aria-selected="${o.value === current.value}">
+                  <span>${esc(o.label)}</span>${CHECK}
+                </li>
+              `).join('')}
+            </ul>
+          </div>
+        </div>`;
+    }
+
+    /* Rounds an axis maximum up to a readable 1/2/5 step. */
+    function niceMax(value) {
+      if (value <= 5) return Math.max(1, value);
+      const mag = Math.pow(10, Math.floor(Math.log10(value)));
+      for (const step of [1, 1.5, 2, 3, 4, 5, 7.5, 10]) {
+        if (value <= step * mag) return step * mag;
+      }
+      return 10 * mag;
+    }
+
+    /* Rendered in two passes: the markup goes in as an empty sized box, then
+       `drawCharts()` measures it and builds a viewBox that matches, so the
+       chart fills whatever height the layout gives it without stretching. */
+    function chartBox(key) {
+      return `<div class="a-chart" data-chart="${esc(key)}"></div>`;
+    }
+
+    function chartSvg(buckets, W, H) {
+      const PL = 54, PR = 18, PT = 20, PB = 56;
+      const iw = W - PL - PR, ih = H - PT - PB;
+      const n = buckets.length;
+      const top = niceMax(Math.max(...buckets.map(b => b.views), 1));
+
+      const x = (i) => PL + (n === 1 ? iw / 2 : (i / (n - 1)) * iw);
+      const y = (v) => PT + ih - (v / top) * ih;
+
+      const yTicks = 4;
+      const grid = Array.from({ length: yTicks + 1 }, (_, i) => {
+        const v = (top / yTicks) * i;
+        return `
+          <line class="grid" x1="${PL}" y1="${y(v)}" x2="${W - PR}" y2="${y(v)}" />
+          <text class="tick" x="${PL - 10}" y="${y(v) + 4}" text-anchor="end">${num(Math.round(v))}</text>`;
+      }).join('');
+
+      /* Aim for about six x labels no matter how wide the window is. */
+      const every = Math.max(1, Math.ceil(n / 6));
+      const xLabels = buckets.map((b, i) =>
+        (i % every === 0 || i === n - 1)
+          ? `<text class="tick" x="${x(i)}" y="${PT + ih + 20}" text-anchor="middle">${esc(fmtDay(b.date))}</text>`
+          : ''
+      ).join('');
+
+      const points = buckets.map((b, i) => `${x(i)},${y(b.views)}`);
+      const line = `M ${points.join(' L ')}`;
+      const area = `${line} L ${x(n - 1)},${PT + ih} L ${x(0)},${PT + ih} Z`;
+
+      /* Dots turn into noise once the window is long. */
+      const dots = n <= 31
+        ? buckets.map((b, i) =>
+            `<circle class="dot" cx="${x(i)}" cy="${y(b.views)}" r="3">
+               <title>${esc(fmtDay(b.date))}: ${num(b.views)} views</title>
+             </circle>`).join('')
+        : '';
+
+      return `
+        <svg viewBox="0 0 ${W} ${H}" role="img"
+             aria-label="Views per day over the last ${n} days">
+          ${grid}
+          <path class="area" d="${area}" />
+          <path class="line" d="${line}" />
+          ${dots}
+          <line class="axis" x1="${PL}" y1="${PT + ih}" x2="${W - PR}" y2="${PT + ih}" />
+          <line class="axis" x1="${PL}" y1="${PT}" x2="${PL}" y2="${PT + ih}" />
+          ${xLabels}
+          <text class="a-axis-title" x="${PL + iw / 2}" y="${H - 10}" text-anchor="middle">Day</text>
+          <text class="a-axis-title" x="${-(PT + ih / 2)}" y="15"
+                text-anchor="middle" transform="rotate(-90)">Views</text>
+        </svg>`;
+    }
+
+    /* Buckets waiting to be drawn, keyed by the box's data-chart value. */
+    const chartData = new Map();
+
+    function drawCharts() {
+      root.querySelectorAll('.a-chart[data-chart]').forEach((box) => {
+        const buckets = chartData.get(box.dataset.chart);
+        if (!buckets) return;
+        const W = Math.max(320, Math.round(box.clientWidth));
+        const H = Math.max(220, Math.round(box.clientHeight));
+        box.innerHTML = chartSvg(buckets, W, H);
+      });
+    }
+
+    let resizeTimer = null;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(drawCharts, 150);
+    });
+
+    /* ── Overview ── */
+
+    function renderOverview() {
+      const days = windowDays();
+      const recent = summarize(state.events, { days });
+
+      const lifetime = state.articles.reduce((acc, a) => ({
+        views:  acc.views  + (a.viewCount   || 0),
+        likes:  acc.likes  + (a.likeCount   || 0),
+        shares: acc.shares + (a.repostCount || 0),
+      }), { views: 0, likes: 0, shares: 0 });
+
+      const cDays = chartDays();
+      chartData.set('overview', dailyViews(state.events, { days: cDays }));
+
+      root.innerHTML = `
+        <div class="a-head">
+          <div>
+            <h1 class="page-title">Analytics</h1>
+            <p class="page-sub">Readership and engagement across the journal.</p>
+          </div>
+          ${dropdown('dd-window', 'Window', WINDOWS, state.window)}
+        </div>
+
+        <div class="a-layout">
+          <div class="a-col">
+            <h2 class="a-section-title">Audience</h2>
+            <p class="a-section-note">Active means signed in or engaging with an article within the window.</p>
+            ${statBlock('blue', [
+              { label: 'Total users', value: num(state.users.length) },
+              { label: 'Active users', value: num(countActiveUsers(state.users, days)), sub: windowLabel() },
+              { label: 'Active last 7 days', value: num(countActiveUsers(state.users, 7)) },
+              { label: 'Published articles', value: num(state.articles.length) },
+            ])}
+
+            <h2 class="a-section-title">Engagement, ${esc(windowLabel())}</h2>
+            <p class="a-section-note">Counted from the event log, which began collecting on this deployment.</p>
+            ${statBlock('lav', [
+              { label: 'Views', value: num(recent.views) },
+              { label: 'Likes', value: num(recent.likes) },
+              { label: 'Shares', value: num(recent.shares) },
+              { label: 'Signed-in readers', value: num(recent.signedInViewers) },
+            ])}
+
+          </div>
+
+          <div class="a-col a-col-chart">
+            <h2 class="a-section-title">Views per day</h2>
+            <p class="a-section-note">Last ${cDays} days, all articles.</p>
+            ${chartBox('overview')}
+          </div>
+        </div>
+
+        ${state.window === 'all' ? '' : `
+          <h2 class="a-section-title">Engagement, all time</h2>
+          <p class="a-section-note">Running totals stored on each article since it was published.</p>
+          ${statBlock('teal', [
+            { label: 'Views', value: num(lifetime.views) },
+            { label: 'Likes', value: num(lifetime.likes) },
+            { label: 'Shares', value: num(lifetime.shares) },
+          ], { wide: true })}
+        `}
+
+        <div class="a-head" style="margin-top:2.75rem;margin-bottom:0">
+          <div>
+            <h2 class="a-section-title" style="margin-top:0">Articles</h2>
+            <p class="a-section-note" style="margin-bottom:0">Select an article for its own breakdown.</p>
+          </div>
+          ${dropdown('dd-sort', 'Rank by', SORTS, state.sort)}
+        </div>
+
+        ${renderTable()}
+      `;
+
+      wire();
+    }
+
+    function sortedArticles() {
+      const recentByArticle = summarizeByArticle(state.events, { days: windowDays() });
+      const rows = state.articles.map(a => ({
+        article: a,
+        recent: recentByArticle.get(a.id) || EMPTY_SUMMARY,
+        created: toDate(a.createdAt),
+      }));
+
+      const by = {
+        views:  (x, y) => (y.article.viewCount   || 0) - (x.article.viewCount   || 0),
+        likes:  (x, y) => (y.article.likeCount   || 0) - (x.article.likeCount   || 0),
+        shares: (x, y) => (y.article.repostCount || 0) - (x.article.repostCount || 0),
+        recent: (x, y) => (y.created?.getTime() || 0) - (x.created?.getTime() || 0),
+        oldest: (x, y) => (x.created?.getTime() || Infinity) - (y.created?.getTime() || Infinity),
+      };
+      return rows.sort(by[state.sort] || by.views);
+    }
+
+    function renderTable() {
+      const rows = sortedArticles();
+      if (!rows.length) return `<p class="a-empty">No articles published yet.</p>`;
+
+      return `
+        <div class="a-table-wrap">
+          <table class="a-table">
+            <thead>
+              <tr>
+                <th scope="col">Article</th>
+                <th scope="col">Published</th>
+                <th scope="col">Views</th>
+                <th scope="col">Likes</th>
+                <th scope="col">Shares</th>
+                <th scope="col">Views, ${esc(windowLabel())}</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows.map(({ article: a, recent, created }) => `
+                <tr data-id="${esc(a.id)}" tabindex="0">
+                  <td class="a-title-cell">
+                    ${esc(a.title || 'Untitled')}
+                    <span class="meta">${esc(articleAuthorName(a))}${articleAuthorSchool(a) ? ' &middot; ' + esc(articleAuthorSchool(a)) : ''}</span>
+                  </td>
+                  <td>${esc(fmtDate(created))}</td>
+                  <td>${num(a.viewCount)}</td>
+                  <td>${num(a.likeCount)}</td>
+                  <td>${num(a.repostCount)}</td>
+                  <td>${num(recent.views)}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>`;
+    }
+
+    /* ── Single article ── */
+
+    function renderDetail() {
+      const a = state.articles.find(x => x.id === state.articleId);
+      if (!a) {
+        root.innerHTML = `
+          <a class="a-back" href="/pages/analytics.html">Back to all articles</a>
+          <p class="a-empty">That article no longer exists.</p>`;
+        return;
+      }
+
+      const days = windowDays();
+      const recent = summarize(state.events, { days, articleId: a.id });
+      const created = toDate(a.createdAt);
+      const cDays = chartDays();
+      chartData.set('detail', dailyViews(state.events, { days: cDays, articleId: a.id }));
+
+      root.innerHTML = `
+        <a class="a-back" href="/pages/analytics.html">Back to all articles</a>
+
+        <div class="a-head">
+          <div>
+            <h1 class="a-detail-title">${esc(a.title || 'Untitled')}</h1>
+            <p class="a-detail-meta">
+              ${esc(articleAuthorName(a))}${articleAuthorSchool(a) ? ' &middot; ' + esc(articleAuthorSchool(a)) : ''} &middot; ${esc(fmtDate(created))}
+              &middot; <a href="/pages/article.html?id=${encodeURIComponent(a.id)}">View article</a>
+            </p>
+          </div>
+          ${dropdown('dd-window', 'Window', WINDOWS, state.window)}
+        </div>
+
+        <div class="a-layout">
+          <div class="a-col">
+            <h2 class="a-section-title">Engagement, ${esc(windowLabel())}</h2>
+            <p class="a-section-note">Counted from the event log.</p>
+            ${statBlock('lav', [
+              { label: 'Views', value: num(recent.views) },
+              { label: 'Likes', value: num(recent.likes) },
+              { label: 'Shares', value: num(recent.shares) },
+              { label: 'Signed-in readers', value: num(recent.signedInViewers) },
+            ])}
+          </div>
+
+          <div class="a-col a-col-chart">
+            <h2 class="a-section-title">Views per day</h2>
+            <p class="a-section-note">Last ${cDays} days.</p>
+            ${chartBox('detail')}
+          </div>
+        </div>
+
+        ${state.window === 'all' ? '' : `
+          <h2 class="a-section-title">All time</h2>
+          <p class="a-section-note">Running totals stored on the article since it was published.</p>
+          ${statBlock('teal', [
+            { label: 'Views', value: num(a.viewCount) },
+            { label: 'Likes', value: num(a.likeCount) },
+            { label: 'Shares', value: num(a.repostCount) },
+          ], { wide: true })}
+        `}
+      `;
+
+      wire();
+    }
+
+    /* ── Dropdown behavior ── */
+
+    function initDropdown(id, onSelect) {
+      const dd = document.getElementById(id);
+      if (!dd) return;
+
+      const btn  = dd.querySelector('.a-dd-btn');
+      const opts = Array.from(dd.querySelectorAll('.a-dd-opt'));
+
+      const highlight = (i) => opts.forEach((o, n) => o.classList.toggle('active', n === i));
+      let cursor = Math.max(0, opts.findIndex(o => o.getAttribute('aria-selected') === 'true'));
+
+      const open = () => {
+        closeAllDropdowns(dd);
+        dd.classList.add('open');
+        btn.setAttribute('aria-expanded', 'true');
+        highlight(cursor);
+      };
+      const close = () => {
+        dd.classList.remove('open');
+        btn.setAttribute('aria-expanded', 'false');
+      };
+      dd._close = close;
+
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        dd.classList.contains('open') ? close() : open();
+      });
+
+      opts.forEach((opt, i) => {
+        opt.addEventListener('click', (e) => {
+          e.stopPropagation();
+          close();
+          onSelect(opt.dataset.value);
+        });
+        opt.addEventListener('mouseenter', () => { cursor = i; highlight(i); });
+      });
+
+      dd.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') { close(); btn.focus(); return; }
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          if (!dd.classList.contains('open')) { open(); return; }
+          close();
+          onSelect(opts[cursor].dataset.value);
+          return;
+        }
+        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+          e.preventDefault();
+          if (!dd.classList.contains('open')) { open(); return; }
+          cursor = (cursor + (e.key === 'ArrowDown' ? 1 : -1) + opts.length) % opts.length;
+          highlight(cursor);
+        }
+      });
+    }
+
+    function closeAllDropdowns(except = null) {
+      root.querySelectorAll('.a-dd').forEach((dd) => {
+        if (dd !== except && dd._close) dd._close();
+      });
+    }
+
+    document.addEventListener('click', () => closeAllDropdowns());
+
+    /* ── Wiring ── */
+
+    function wire() {
+      drawCharts();
+
+      initDropdown('dd-window', (value) => {
+        state.window = value;
+        render();
+      });
+
+      initDropdown('dd-sort', (value) => {
+        state.sort = value;
+        render();
+      });
+
+      root.querySelectorAll('tbody tr[data-id]').forEach((tr) => {
+        const open = () => {
+          state.articleId = tr.dataset.id;
+          history.pushState({}, '', `/pages/analytics.html?id=${encodeURIComponent(state.articleId)}`);
+          render();
+          window.scrollTo({ top: 0 });
+        };
+        tr.addEventListener('click', open);
+        tr.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); }
+        });
+      });
+    }
+
+    function render() {
+      if (state.articleId) renderDetail();
+      else renderOverview();
+    }
+
+    window.addEventListener('popstate', () => {
+      state.articleId = new URLSearchParams(location.search).get('id');
+      render();
+    });
+
+    /* ── Gate ── */
+
+    function showMessage(title, body) {
+      root.innerHTML = `
+        <div class="a-message">
+          <h2>${esc(title)}</h2>
+          <p>${esc(body)}</p>
+        </div>`;
+    }
+
+    async function load() {
+      root.innerHTML = `<p class="a-empty">Loading…</p>`;
+      try {
+        /* Users and events are author-only reads; a rules failure on either
+           should not blank the whole dashboard. */
+        const [articles, users, events] = await Promise.all([
+          fetchArticles({ limit: 200 }),
+          fetchUsers().catch(() => []),
+          fetchEvents().catch(() => []),
+        ]);
+        state.articles = articles;
+        state.users = users;
+        state.events = events;
+        render();
+      } catch (e) {
+        console.error(e);
+        showMessage('Could not load analytics', 'Something went wrong fetching the data. Try reloading the page.');
+      }
+    }
+
+    let loadedFor = null;
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        loadedFor = null;
+        showMessage('Sign in required', 'This dashboard is only available to Urban BEARS authors. Sign in from the navigation bar.');
+        return;
+      }
+      if (loadedFor === user.uid) return;
+
+      if (!(await isAuthor(user.uid))) {
+        loadedFor = null;
+        showMessage('Not authorized', 'Your account does not have author access, so this dashboard is unavailable.');
+        return;
+      }
+      loadedFor = user.uid;
+      load();
+    });
+  </script>
+
+</body>
+</html>

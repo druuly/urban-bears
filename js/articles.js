@@ -12,6 +12,26 @@ export { app, db };
 
 const COLL = 'articles';
 
+/* Bylines come from the subtitle, not the uploader's account.
+   Articles are often published on a student's behalf, so `authorName` /
+   `authorSchool` hold whoever pressed publish. The subtitle is written as
+   "First Last, High School Name" — everything before the first comma is the
+   real author, everything after it is their school. If there is no comma we
+   fall back to the account fields. */
+export function articleAuthorName(a = {}) {
+  const [before] = String(a.subtitle || '').split(',');
+  const name = (before || '').trim();
+  if (name && String(a.subtitle || '').includes(',')) return name;
+  return a.authorName || 'Anonymous';
+}
+
+export function articleAuthorSchool(a = {}) {
+  const sub = String(a.subtitle || '');
+  const i = sub.indexOf(',');
+  const school = i === -1 ? '' : sub.slice(i + 1).trim();
+  return school || a.authorSchool || '';
+}
+
 export async function fetchArticles({ limit = 60 } = {}) {
   const q = query(collection(db, COLL), orderBy('createdAt', 'desc'), fbLimit(limit));
   const snap = await getDocs(q);

@@ -1437,7 +1437,7 @@
     import { doc, getDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
     import { app, auth, signIn, signOut, signInErrorMessage } from '/js/firebase.js';
     import { checkAndShowProfileModal } from '/js/profile-modal.js';
-    import { db, fetchArticles, publishArticle } from '/js/articles.js';
+    import { db, fetchArticles, publishArticle, articleAuthorName, articleAuthorSchool } from '/js/articles.js';
 
     /* Shared components (nav, footer, profile modal) must be in the DOM
        before any code below queries it. */
@@ -1739,7 +1739,7 @@
           <div class="cover" ${a.coverUrl ? `style="background-image:url('${escapeHtml(a.coverUrl)}')"` : ''}></div>
           <h3>${escapeHtml(a.title || 'Untitled')}</h3>
           <div class="card-byline">
-            <span class="byline-text">${escapeHtml(a.authorName || 'Anonymous')}${a.authorSchool ? ' · ' + escapeHtml(a.authorSchool) : ''} · ${fmtDate(a.createdAt)}</span>
+            <span class="byline-text">${escapeHtml(articleAuthorName(a))}${articleAuthorSchool(a) ? ' · ' + escapeHtml(articleAuthorSchool(a)) : ''} · ${fmtDate(a.createdAt)}</span>
           </div>
         </article>`;
 
@@ -1748,7 +1748,7 @@
           <div class="cover" ${a.coverUrl ? `style="background-image:url('${escapeHtml(a.coverUrl)}')"` : ''}></div>
           <h2>${escapeHtml(a.title || 'Untitled')}</h2>
           <div class="card-byline">
-            <span class="byline-text">${escapeHtml(a.authorName || 'Anonymous')}${a.authorSchool ? ' · ' + escapeHtml(a.authorSchool) : ''} · ${fmtDate(a.createdAt)}</span>
+            <span class="byline-text">${escapeHtml(articleAuthorName(a))}${articleAuthorSchool(a) ? ' · ' + escapeHtml(articleAuthorSchool(a)) : ''} · ${fmtDate(a.createdAt)}</span>
           </div>
         </article>`;
 
@@ -1766,7 +1766,7 @@
           <div class="cover" ${a.coverUrl ? `style="background-image:url('${escapeHtml(a.coverUrl)}')"` : ''}></div>
           <h3>${escapeHtml(a.title || 'Untitled')}</h3>
           <div class="card-byline">
-            <span class="byline-text">${escapeHtml(a.authorName || 'Anonymous')}${a.authorSchool ? ' · ' + escapeHtml(a.authorSchool) : ''} · ${fmtDate(a.createdAt)}</span>
+            <span class="byline-text">${escapeHtml(articleAuthorName(a))}${articleAuthorSchool(a) ? ' · ' + escapeHtml(articleAuthorSchool(a)) : ''} · ${fmtDate(a.createdAt)}</span>
           </div>
         </article>`;
 
@@ -1842,7 +1842,8 @@
         list = list.filter(a =>
           (a.title || '').toLowerCase().includes(search) ||
           (a.subtitle || '').toLowerCase().includes(search) ||
-          (a.authorName || '').toLowerCase().includes(search)
+          articleAuthorName(a).toLowerCase().includes(search) ||
+          articleAuthorSchool(a).toLowerCase().includes(search)
         );
       }
       if (!list.length) {
@@ -1856,7 +1857,7 @@
               <div class="info">
                 <h3>${escapeHtml(a.title || 'Untitled')}</h3>
                 <div class="row-meta card-byline">
-                  <span class="byline-text">${escapeHtml(a.authorName || 'Anonymous')}${a.authorSchool ? ' · ' + escapeHtml(a.authorSchool) : ''} · ${fmtDate(a.createdAt)} · URBANBEARS</span>
+                  <span class="byline-text">${escapeHtml(articleAuthorName(a))}${articleAuthorSchool(a) ? ' · ' + escapeHtml(articleAuthorSchool(a)) : ''} · ${fmtDate(a.createdAt)} · URBANBEARS</span>
                 </div>
                 <div class="row-stats">
                   <span>♥ ${a.likeCount || 0}</span>

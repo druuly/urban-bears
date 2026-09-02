@@ -481,6 +481,7 @@
       serverTimestamp, increment, updateDoc, onSnapshot
     } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
     import { app, auth, db, signIn, signOut, signInErrorMessage } from '/js/firebase.js';
+    import { articleAuthorName, articleAuthorSchool } from '/js/articles.js';
     import { checkAndShowProfileModal } from '/js/profile-modal.js';
 
     /* Shared components (nav, footer, profile modal) must be in the DOM
@@ -565,6 +566,8 @@
         : '';
       const coverClass = a.coverUrl ? '' : 'empty';
       const subtitle = a.subtitle ? escapeHtml(a.subtitle) : '';
+      const authorName = articleAuthorName(a);
+      const authorSchool = articleAuthorSchool(a);
       const date = fmtDate(a.createdAt);
       const body = DOMPurify.sanitize(a.body || '');
       const tagsHtml = (a.tags || [])
@@ -576,8 +579,8 @@
         <p class="article-subtitle">${subtitle}</p>
         <div class="article-byline">
           <div class="pub-info">
-            <span class="pub-name">${escapeHtml(a.authorName || 'Anonymous')}</span>
-            <span class="pub-date">${a.authorSchool ? escapeHtml(a.authorSchool) + ' · ' : ''}URBANBEARS · ${date}</span>
+            <span class="pub-name">${escapeHtml(authorName)}</span>
+            <span class="pub-date">${authorSchool ? escapeHtml(authorSchool) + ' · ' : ''}URBANBEARS · ${date}</span>
           </div>
         </div>
         <div class="article-actions">

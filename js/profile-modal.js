@@ -2,14 +2,38 @@ import {
   getFirestore, doc, getDoc, setDoc
 } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
+/* One shared promise per uid. onAuthStateChanged can fire several times for a
+   single sign-in (session restore, redirect result, token refresh), and some
+   pages call this on every firing without awaiting it. Without this guard each
+   firing would attach another submit listener to the same form. */
+const pending = new Map();
+
 export async function checkAndShowProfileModal(user, app) {
+  const existing = pending.get(user.uid);
+  if (existing) return existing;
+
+  const run = showModalIfNeeded(user, app).finally(() => pending.delete(user.uid));
+  pending.set(user.uid, run);
+  return run;
+}
+
+async function showModalIfNeeded(user, app) {
   const db  = getFirestore(app);
   const ref = doc(db, 'users', user.uid);
 
-  let snap = null;
-  try { snap = await getDoc(ref); } catch { /* permission denied or offline — fall through to show modal */ }
+  let snap;
+  try {
+    snap = await getDoc(ref);
+  } catch (err) {
+    /* A failed read is NOT the same as "no profile". Showing the modal here
+       would nag a user who already completed it — and their re-submit would
+       succeed, so the bug looks like the form never saving. Skip this page
+       load instead; a genuinely new user gets prompted on the next one. */
+    console.warn('Profile lookup failed, skipping profile modal:', err?.code || err);
+    return null;
+  }
 
-  if (snap && snap.exists() && snap.data().schoolName) {
+  if (snap.exists() && snap.data().schoolName) {
     return snap.data();
   }
 

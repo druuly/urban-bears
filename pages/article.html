@@ -755,7 +755,7 @@
       });
 
       updateDoc(doc(db, 'articles', state.articleId), { viewCount: increment(1) })
-        .catch(() => {});
+        .catch((e) => console.warn('view count not recorded', e?.code || e));
       logEvent('view', state.articleId);
     };
 

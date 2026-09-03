@@ -11,7 +11,7 @@ engagement. It is linked from the nav, but only for users who have an
 | `pages/analytics.html` | The page: gating, layout, and rendering. |
 | `js/analytics.js` | Event logging, activity stamping, dashboard queries, and the aggregation helpers. |
 | `js/main.js` | Reveals the nav link for authors and calls `touchUserActivity()` on every page load. |
-| `firestore.rules` | The `events` collection and the widened `users` read rule. |
+| Firestore rules (console) | The `events` collection and the widened `users` read rule. |
 
 ## Access control
 
@@ -32,7 +32,7 @@ public site.
 | Metric | Source |
 | --- | --- |
 | Total users | Number of docs in `users`. |
-| Active users (7 / 30 days) | `users` docs whose `lastActiveAt` falls inside the window. |
+| Active users (7 / 30 days) | Union of `users` docs whose `lastActiveAt` falls inside the window and the uids attached to events inside it. |
 | Views / likes / shares, all time | Sum of `viewCount` / `likeCount` / `repostCount` across articles. |
 | Views / likes / shares, recent | Aggregated from `events` inside the selected window. |
 | Signed-in readers | Distinct non-empty `uid` on `view` events in the window. |
@@ -41,15 +41,32 @@ public site.
 "Shares" means reposts, which is the share action already wired up on
 `pages/article.html`.
 
-Lifetime totals are historical and complete. The windowed numbers only
+`lastActiveAt` is only stamped on accounts that have loaded a page since
+the dashboard shipped, so counting it alone would report zero active
+users for everyone who signed up earlier. The event uids cover that gap.
+
+Lifetime totals are only as complete as the counters on the article, and
+those depend on the article update rule allowing the write. A signed-out
+reader can bump `viewCount` and nothing else; likes and reposts need a
+signed-in user, which the UI already enforces. If the rule is tightened
+back to `request.auth != null` for all counter writes, views stop being
+counted for most of the audience and the all-time figures flatten to
+zero.
+
+The windowed numbers only
 cover the period since event logging was deployed, so expect them to
 read low until the log has been collecting for a while.
 
-The counter-based "all time" block is hidden while the window is set to
-all time, since the two blocks would otherwise be headed the same thing.
-That means the default view reports engagement from the event log alone,
-which under-reports anything that happened before logging was deployed.
-Switch to a 30- or 7-day window to see the counter totals alongside it.
+On the all-time window the two engagement blocks would be measuring the
+same span, so they collapse into one: the separate counter block is
+hidden and the main block switches its source to the article counters,
+which carry the full history. The event log only supplies "Signed-in
+readers" there, since no counter tracks that. The article table drops its
+windowed views column on all time for the same reason.
+
+The "Views per day" graph is always event-based, so on all time it only
+goes back as far as the log does. There is no historical per-day data to
+backfill from.
 
 ## How the data is fetched
 
@@ -84,7 +101,7 @@ in-memory data. Back/forward work through `popstate`.
 - **Something already stored on the article:** read it in
   `renderOverview` / `renderDetail`, no rules change needed.
 - **Something time-windowed:** add a new `type` string, log it with
-  `logEvent()`, add it to the `type in [...]` list in `firestore.rules`,
+  `logEvent()`, add it to the `type in [...]` list in the console rules,
   and handle it in the `switch` inside `summarize()`.
 - **A new counter field on the article:** it must also be added to the
   `hasOnly([...])` list in the article update rule, or the increment

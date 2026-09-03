@@ -28,6 +28,13 @@ onAuthStateChanged(auth, () => settle());
 
 /* ── Writes ── */
 
+/* Analytics writes must never break a page, but swallowing them silently is
+   how a dashboard ends up reporting zeros with nothing to explain them. */
+const warn = (what) => (e) => {
+  console.warn(`analytics: ${what} failed`, e?.code || e);
+  return null;
+};
+
 /* type: 'view' | 'like' | 'unlike' | 'repost' | 'unrepost' */
 export async function logEvent(type, articleId) {
   await authReady;
@@ -36,7 +43,7 @@ export async function logEvent(type, articleId) {
     articleId: articleId || '',
     uid: auth.currentUser?.uid || '',
     createdAt: serverTimestamp(),
-  }).catch(() => null);
+  }).catch(warn(`logging ${type} event`));
 }
 
 /* Stamps users/{uid}.lastActiveAt. Rules allow this as either a merge onto an
@@ -48,7 +55,7 @@ export function touchUserActivity(user) {
     doc(db, 'users', user.uid),
     { lastActiveAt: serverTimestamp() },
     { merge: true }
-  ).catch(() => null);
+  ).catch(warn('stamping lastActiveAt'));
 }
 
 /* ── Reads ── */
@@ -163,13 +170,23 @@ export function dailyViews(events, { days = 14, articleId = null } = {}) {
   return buckets;
 }
 
-/* `days: null` counts everyone who has ever been seen. */
-export function countActiveUsers(users, days) {
+/* Active means signed in or engaging with an article inside the window, so
+   this counts two sources: the lastActiveAt stamp on the user doc, and any
+   uid attached to an event. The stamp only exists on accounts that have
+   loaded a page since it shipped, so on its own it reads as zero for every
+   user who signed up earlier. `days: null` counts everyone ever seen. */
+export function countActiveUsers(users, days, events = []) {
   const cutoff = days ? Date.now() - days * DAY_MS : 0;
-  return users.filter(u => {
+  const active = new Set();
+
+  for (const u of users) {
     const t = u.lastActiveAt?.toDate?.()?.getTime();
-    return t && t >= cutoff;
-  }).length;
+    if (t && t >= cutoff) active.add(u.id);
+  }
+  for (const e of events) {
+    if (e.uid && e.at.getTime() >= cutoff) active.add(e.uid);
+  }
+  return active.size;
 }
 
 /* Oldest event in the log, or null when the log is empty. */

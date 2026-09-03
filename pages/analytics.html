@@ -246,6 +246,18 @@
     .a-message p { font-size: .98rem; }
     .a-empty { padding: 2rem 0; }
 
+    /* Shown when part of the data could not be read, so the page never
+       presents an incomplete picture as if it were the real numbers. */
+    .a-warn {
+      background: rgba(233,150,150,.12);
+      border: 1px solid rgba(233,150,150,.55);
+      border-radius: .5rem;
+      padding: .8rem 1rem;
+      font-size: .9rem;
+      margin-bottom: 1.5rem;
+    }
+    .a-warn p + p { margin-top: .35rem; }
+
     @media (max-width: 64rem) {
       .a-layout { grid-template-columns: minmax(0, 1fr); }
       .a-col-chart > .a-section-title { margin-top: 2.75rem; }
@@ -297,6 +309,7 @@
       articles: [],
       users: [],
       events: [],
+      notes: [],              // data that could not be read this load
       window: 'all',          // 'all' | '30' | '7'
       sort: 'views',
       articleId: new URLSearchParams(location.search).get('id'),
@@ -346,6 +359,10 @@
     }
 
     /* ── Fragments ── */
+
+    const noticeBlock = () => state.notes.length
+      ? `<div class="a-warn">${state.notes.map(n => `<p>${esc(n)}</p>`).join('')}</div>`
+      : '';
 
     const statBlock = (accent, stats, { wide = false } = {}) => `
       <div class="a-stats${wide ? ' wide' : ''}" data-accent="${accent}">
@@ -490,10 +507,19 @@
         shares: acc.shares + (a.repostCount || 0),
       }), { views: 0, likes: 0, shares: 0 });
 
+      /* On the all-time window the event log would under-report everything
+         that happened before logging shipped, so use the article counters,
+         which have the full history. Signed-in readers has no counter
+         equivalent, so it stays event-based either way. */
+      const engagement = state.window === 'all'
+        ? { ...lifetime, signedInViewers: recent.signedInViewers }
+        : recent;
+
       const cDays = chartDays();
       chartData.set('overview', dailyViews(state.events, { days: cDays }));
 
       root.innerHTML = `
+        ${noticeBlock()}
         <div class="a-head">
           <div>
             <h1 class="page-title">Analytics</h1>
@@ -508,18 +534,20 @@
             <p class="a-section-note">Active means signed in or engaging with an article within the window.</p>
             ${statBlock('blue', [
               { label: 'Total users', value: num(state.users.length) },
-              { label: 'Active users', value: num(countActiveUsers(state.users, days)), sub: windowLabel() },
-              { label: 'Active last 7 days', value: num(countActiveUsers(state.users, 7)) },
+              { label: 'Active users', value: num(countActiveUsers(state.users, days, state.events)), sub: windowLabel() },
+              { label: 'Active last 7 days', value: num(countActiveUsers(state.users, 7, state.events)) },
               { label: 'Published articles', value: num(state.articles.length) },
             ])}
 
             <h2 class="a-section-title">Engagement, ${esc(windowLabel())}</h2>
-            <p class="a-section-note">Counted from the event log, which began collecting on this deployment.</p>
+            <p class="a-section-note">${state.window === 'all'
+              ? 'Running totals stored on each article since it was published.'
+              : 'Counted from the event log, which began collecting on this deployment.'}</p>
             ${statBlock('lav', [
-              { label: 'Views', value: num(recent.views) },
-              { label: 'Likes', value: num(recent.likes) },
-              { label: 'Shares', value: num(recent.shares) },
-              { label: 'Signed-in readers', value: num(recent.signedInViewers) },
+              { label: 'Views', value: num(engagement.views) },
+              { label: 'Likes', value: num(engagement.likes) },
+              { label: 'Shares', value: num(engagement.shares) },
+              { label: 'Signed-in readers', value: num(engagement.signedInViewers) },
             ])}
 
           </div>
@@ -587,7 +615,7 @@
                 <th scope="col">Views</th>
                 <th scope="col">Likes</th>
                 <th scope="col">Shares</th>
-                <th scope="col">Views, ${esc(windowLabel())}</th>
+                ${state.window === 'all' ? '' : `<th scope="col">Views, ${esc(windowLabel())}</th>`}
               </tr>
             </thead>
             <tbody>
@@ -601,7 +629,7 @@
                   <td>${num(a.viewCount)}</td>
                   <td>${num(a.likeCount)}</td>
                   <td>${num(a.repostCount)}</td>
-                  <td>${num(recent.views)}</td>
+                  ${state.window === 'all' ? '' : `<td>${num(recent.views)}</td>`}
                 </tr>
               `).join('')}
             </tbody>
@@ -623,11 +651,21 @@
       const days = windowDays();
       const recent = summarize(state.events, { days, articleId: a.id });
       const created = toDate(a.createdAt);
+      const engagement = state.window === 'all'
+        ? {
+            views:  a.viewCount   || 0,
+            likes:  a.likeCount   || 0,
+            shares: a.repostCount || 0,
+            signedInViewers: recent.signedInViewers,
+          }
+        : recent;
+
       const cDays = chartDays();
       chartData.set('detail', dailyViews(state.events, { days: cDays, articleId: a.id }));
 
       root.innerHTML = `
         <a class="a-back" href="/pages/analytics.html">Back to all articles</a>
+        ${noticeBlock()}
 
         <div class="a-head">
           <div>
@@ -643,12 +681,14 @@
         <div class="a-layout">
           <div class="a-col">
             <h2 class="a-section-title">Engagement, ${esc(windowLabel())}</h2>
-            <p class="a-section-note">Counted from the event log.</p>
+            <p class="a-section-note">${state.window === 'all'
+              ? 'Running totals stored on the article since it was published.'
+              : 'Counted from the event log.'}</p>
             ${statBlock('lav', [
-              { label: 'Views', value: num(recent.views) },
-              { label: 'Likes', value: num(recent.likes) },
-              { label: 'Shares', value: num(recent.shares) },
-              { label: 'Signed-in readers', value: num(recent.signedInViewers) },
+              { label: 'Views', value: num(engagement.views) },
+              { label: 'Likes', value: num(engagement.likes) },
+              { label: 'Shares', value: num(engagement.shares) },
+              { label: 'Signed-in readers', value: num(engagement.signedInViewers) },
             ])}
           </div>
 
@@ -788,13 +828,24 @@
 
     async function load() {
       root.innerHTML = `<p class="a-empty">Loading…</p>`;
+      state.notes = [];
+
+      /* Users and events are author-only reads; a rules failure on either
+         should not blank the whole dashboard. It must not pass silently
+         either, or the page reports zeros that look like real numbers. */
+      const soft = (label, promise) => promise.catch((e) => {
+        console.error(`analytics: ${label} read failed`, e);
+        state.notes.push(
+          `Could not read ${label} (${e?.code || 'error'}). Any figure based on it reads as zero below.`
+        );
+        return [];
+      });
+
       try {
-        /* Users and events are author-only reads; a rules failure on either
-           should not blank the whole dashboard. */
         const [articles, users, events] = await Promise.all([
           fetchArticles({ limit: 200 }),
-          fetchUsers().catch(() => []),
-          fetchEvents().catch(() => []),
+          soft('the user list', fetchUsers()),
+          soft('the event log', fetchEvents()),
         ]);
         state.articles = articles;
         state.users = users;

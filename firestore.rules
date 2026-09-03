@@ -14,21 +14,20 @@ service cloud.firestore {
           && request.resource.data.lastName is string
           && request.resource.data.schoolName is string;
       }
-      function onlyActivity() {
-        return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastActiveAt']);
-      }
 
       // Own doc, or any doc if you're an author (the analytics dashboard
       // needs to count users and measure recent activity).
       allow read: if request.auth != null && (request.auth.uid == uid || isAuthor());
 
+      // Either a full profile write, or a lastActiveAt-only write.
       allow create: if request.auth != null
         && request.auth.uid == uid
         && (hasProfileFields() || request.resource.data.keys().hasOnly(['lastActiveAt']));
 
       allow update: if request.auth != null
         && request.auth.uid == uid
-        && (hasProfileFields() || onlyActivity());
+        && (hasProfileFields()
+            || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastActiveAt']));
     }
 
     match /authors/{uid} {
@@ -36,9 +35,9 @@ service cloud.firestore {
       allow write: if false;  // manage authors via console only
     }
 
-    // Append-only engagement log. Every doc is one action at one moment,
-    // which is what makes time-windowed analytics possible; the counters on
-    // the article doc stay the source of truth for lifetime totals.
+    // Append-only engagement log. One doc per action, timestamped, which is
+    // what makes windowed analytics possible. Counters on the article doc
+    // stay the source of truth for lifetime totals.
     match /events/{eventId} {
       allow read: if isAuthor();
 
@@ -59,13 +58,27 @@ service cloud.firestore {
         && exists(/databases/$(database)/documents/authors/$(request.auth.uid))
         && request.resource.data.authorUid == request.auth.uid;
 
+      function touchesOnly(fields) {
+        return request.resource.data.diff(resource.data).affectedKeys().hasOnly(fields);
+      }
+
+      // Every reader logs a view and most readers are signed out, so this one
+      // cannot require auth or viewCount never moves. Restricted to a single
+      // +1 so it can't be used to write an arbitrary number.
+      function viewBump() {
+        return touchesOnly(['viewCount'])
+          && request.resource.data.viewCount is number
+          && request.resource.data.viewCount == resource.data.get('viewCount', 0) + 1;
+      }
+
       // Authors can fully edit their own articles.
-      // Signed-in users can ONLY increment counter fields (likes/reposts/views).
-      allow update: if request.auth != null && (
-        resource.data.authorUid == request.auth.uid
-        || request.resource.data.diff(resource.data).affectedKeys()
-             .hasOnly(['likeCount', 'repostCount', 'viewCount'])
-      );
+      // Signed-in users can ONLY change counter fields (likes/reposts/views).
+      // Everyone else can only bump the view counter.
+      allow update: if (request.auth != null && (
+          resource.data.authorUid == request.auth.uid
+          || touchesOnly(['likeCount', 'repostCount', 'viewCount'])
+        ))
+        || viewBump();
 
       allow delete: if request.auth != null
         && resource.data.authorUid == request.auth.uid;

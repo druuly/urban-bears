@@ -21,10 +21,25 @@ export const DAY_MS = 86400000;
 
 /* Firebase restores the session asynchronously, so `auth.currentUser` is null
    for a beat after page load. A view logged in that window would be attributed
-   to nobody, so every write waits for the first auth callback. */
-let settle;
-const authReady = new Promise((resolve) => { settle = resolve; });
-onAuthStateChanged(auth, () => settle());
+   to nobody, so every write waits for the first auth callback.
+
+   The wait is capped, and the error callback resolves it too. If auth cannot
+   initialize the observer never fires at all, and blocked storage is a normal
+   state on mobile Safari and in private windows (see the authDomain note in
+   firebase.js). An event attributed to nobody is worth far more than an event
+   that is never written because the page is still waiting on auth. */
+const AUTH_WAIT_MS = 2500;
+
+const authReady = new Promise((resolve) => {
+  let settled = false;
+  const done = () => { settled = true; resolve(); };
+
+  onAuthStateChanged(auth, done, done);
+  setTimeout(() => {
+    if (!settled) console.warn('analytics: auth never settled, logging events unattributed');
+    resolve();
+  }, AUTH_WAIT_MS);
+});
 
 /* ── Writes ── */
 

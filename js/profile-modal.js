@@ -8,7 +8,33 @@ import {
    firing would attach another submit listener to the same form. */
 const pending = new Map();
 
+/* "This account finished onboarding" is a fact that never goes back to false,
+   so it does not need to be re-derived from the network on every page load.
+   Once we have seen a complete profile — either because we just saved one or
+   because a read confirmed one — the answer is cached per uid and no later
+   page load can decide otherwise. Without this, every navigation re-asks
+   Firestore, and any single bad answer (denied read, blocked request, stale
+   cache, wrong account) re-opens the modal on a user who is already done. */
+const DONE_KEY = (uid) => `urbanbears.profileComplete.${uid}`;
+
+function markComplete(uid, profile) {
+  try {
+    localStorage.setItem(DONE_KEY(uid), JSON.stringify({
+      firstName: profile.firstName || '',
+      lastName:  profile.lastName  || '',
+    }));
+  } catch { /* private mode / storage full — we just lose the fast path */ }
+}
+
+function readComplete(uid) {
+  try { return JSON.parse(localStorage.getItem(DONE_KEY(uid)) || 'null'); }
+  catch { return null; }
+}
+
 export async function checkAndShowProfileModal(user, app) {
+  const done = readComplete(user.uid);
+  if (done) return done;
+
   const existing = pending.get(user.uid);
   if (existing) return existing;
 
@@ -34,8 +60,15 @@ async function showModalIfNeeded(user, app) {
   }
 
   if (snap.exists() && snap.data().schoolName) {
+    markComplete(user.uid, snap.data());
     return snap.data();
   }
+
+  /* Reaching here means the read said this account has no profile. If that is
+     ever wrong, this line says which account and what came back, which is the
+     only thing worth knowing when the modal shows up unexpectedly. */
+  console.info('[profile-modal] no profile for', user.uid,
+    '— exists:', snap.exists(), 'fields:', snap.exists() ? Object.keys(snap.data()) : []);
 
   if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') return null;
 
@@ -87,6 +120,7 @@ async function showModalIfNeeded(user, app) {
         const digestOptIn = !!(form.digestOptIn && form.digestOptIn.checked);
         const data = { firstName, lastName, schoolName, uid: user.uid, email: user.email ?? '', digestOptIn };
         await setDoc(ref, data, { merge: true });
+        markComplete(user.uid, data);
         modal.hidden = true;
         modal.setAttribute('aria-hidden', 'true');
         document.body.style.overflow = '';

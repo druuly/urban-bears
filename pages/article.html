@@ -4,6 +4,18 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Article — Urban BEARS</title>
+  <meta name="description" content="A student-written article from the Urban BEARS journal." id="seo-desc" />
+  <link rel="canonical" href="https://urban-bears.vercel.app/pages/article.html" id="seo-canonical" />
+  <meta property="og:site_name" content="Urban BEARS" />
+  <meta property="og:type" content="article" />
+  <meta property="og:title" content="Article — Urban BEARS" id="seo-og-title" />
+  <meta property="og:description" content="A student-written article from the Urban BEARS journal." id="seo-og-desc" />
+  <meta property="og:url" content="https://urban-bears.vercel.app/pages/article.html" id="seo-og-url" />
+  <meta property="og:image" content="https://urban-bears.vercel.app/assets/images/logo/urbanbearlogo.png" id="seo-og-image" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Article — Urban BEARS" id="seo-tw-title" />
+  <meta name="twitter:description" content="A student-written article from the Urban BEARS journal." id="seo-tw-desc" />
+  <meta name="twitter:image" content="https://urban-bears.vercel.app/assets/images/logo/urbanbearlogo.png" id="seo-tw-image" />
 
   <link href="https://fonts.cdnfonts.com/css/the-seasons" rel="stylesheet" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -565,6 +577,28 @@
       if (deleteBtn) deleteBtn.style.display = state.isAuthor ? '' : 'none';
     });
 
+    /* ── SEO meta (crawlers that run JS pick these up) ── */
+    const updateSeo = (a) => {
+      const title = `${a.title || 'Article'} — Urban BEARS`;
+      const text = (a.subtitle ? a.subtitle + '. ' : '') +
+        new DOMParser().parseFromString(DOMPurify.sanitize(a.body || ''), 'text/html').body.textContent;
+      const desc = text.replace(/\s+/g, ' ').trim().slice(0, 160) || $('seo-desc').content;
+      const url = `${location.origin}${location.pathname}?id=${encodeURIComponent(state.articleId)}`;
+      const set = (id, attr, val) => { $(id)[attr] = val; };
+      set('seo-desc', 'content', desc);
+      set('seo-canonical', 'href', url);
+      set('seo-og-title', 'content', title);
+      set('seo-og-desc', 'content', desc);
+      set('seo-og-url', 'content', url);
+      set('seo-tw-title', 'content', title);
+      set('seo-tw-desc', 'content', desc);
+      if (a.coverUrl) {
+        set('seo-og-image', 'content', a.coverUrl);
+        set('seo-tw-image', 'content', a.coverUrl);
+        document.querySelector('meta[name="twitter:card"]').content = 'summary_large_image';
+      }
+    };
+
     /* ── Render article ── */
     const renderArticle = (a) => {
       const coverStyle = a.coverUrl
@@ -753,6 +787,7 @@
         const a = { id: snap.id, ...snap.data() };
         state.article = a;
         document.title = `${a.title || 'Article'} — Urban BEARS`;
+        updateSeo(a);
         renderArticle(a);
       }, (err) => {
         console.error(err);

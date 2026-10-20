@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /pages/analytics.html
+
+Sitemap: https://urban-bears.vercel.app/sitemap.xml

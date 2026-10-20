@@ -108,6 +108,20 @@ img { display: block; max-width: 100%; }
 .page-stars span      { position: absolute; }
 
 /* ══════════════════════════════════════════════
+   SKELETON LOADING
+   Shimmering block used while content loads. Size it with
+   height/width/aspect-ratio on the element itself.
+══════════════════════════════════════════════ */
+.sk {
+  display: block;
+  border-radius: .3rem;
+  background: linear-gradient(90deg, rgba(255,255,255,.06) 25%, rgba(255,255,255,.12) 50%, rgba(255,255,255,.06) 75%);
+  background-size: 200% 100%;
+  animation: sk-shimmer 1.6s infinite;
+}
+@keyframes sk-shimmer { to { background-position: -200% 0; } }
+
+/* ══════════════════════════════════════════════
    PLACEHOLDER UTILITY
    Temporary stand-in for images not yet sourced.
    Remove once real assets are in place.

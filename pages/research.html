@@ -684,14 +684,12 @@
       color: var(--white);
       font-style: italic;
     }
-    .loader {
-      width: 2.4rem; height: 2.4rem;
-      border: 3px solid rgba(255,255,255,.15);
-      border-top-color: var(--white);
-      border-radius: 50%;
-      animation: spin .9s linear infinite;
-      margin: 3rem auto;
-    }
+    /* Skeleton placeholders — built on the real card classes so layout matches */
+    .sk-line { height: .9rem; }
+    .sk-line.wide { width: 85%; }
+    .sk-line.narrow { width: 52%; margin-top: .4rem; }
+    .archive-row.sk-row { animation: none; cursor: default; }
+    .archive-row.sk-row:hover { opacity: 1; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
     /* ════════════════════════════════════════════════════════════════
@@ -1317,7 +1315,49 @@
         <div class="recent-grid" id="drafts-grid"></div>
       </section>
       <div id="home-content">
-        <div class="loader" aria-label="Loading"></div>
+        <div class="home-grid" aria-label="Loading">
+          <div class="home-center">
+            <div class="carousel-track">
+              <div class="featured-center">
+                <div class="cover sk"></div>
+                <div class="sk sk-line wide"></div>
+                <div class="sk sk-line narrow"></div>
+              </div>
+              <div class="featured-center">
+                <div class="cover sk"></div>
+                <div class="sk sk-line wide"></div>
+                <div class="sk sk-line narrow"></div>
+              </div>
+            </div>
+          </div>
+          <div class="home-left">
+            <div class="carousel-track">
+              <div class="small-card">
+                <div class="cover sk"></div>
+                <div class="sk sk-line wide"></div>
+                <div class="sk sk-line narrow"></div>
+              </div>
+              <div class="small-card">
+                <div class="cover sk"></div>
+                <div class="sk sk-line wide"></div>
+                <div class="sk sk-line narrow"></div>
+              </div>
+              <div class="small-card">
+                <div class="cover sk"></div>
+                <div class="sk sk-line wide"></div>
+                <div class="sk sk-line narrow"></div>
+              </div>
+            </div>
+          </div>
+          <div class="home-right">
+            <div class="popular-list">
+              <div class="popular-row"><div class="info"><div class="sk sk-line wide"></div><div class="sk sk-line narrow"></div></div><div class="thumb sk"></div></div>
+              <div class="popular-row"><div class="info"><div class="sk sk-line wide"></div><div class="sk sk-line narrow"></div></div><div class="thumb sk"></div></div>
+              <div class="popular-row"><div class="info"><div class="sk sk-line wide"></div><div class="sk sk-line narrow"></div></div><div class="thumb sk"></div></div>
+              <div class="popular-row"><div class="info"><div class="sk sk-line wide"></div><div class="sk sk-line narrow"></div></div><div class="thumb sk"></div></div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -1334,7 +1374,13 @@
       </div>
       <input type="search" class="archive-search" id="archive-search" placeholder="Search articles…" />
       <div id="archive-content">
-        <div class="loader" aria-label="Loading"></div>
+        <ul class="archive-list" aria-label="Loading">
+          <li class="archive-row sk-row"><div class="info"><div class="sk sk-line wide"></div><div class="sk sk-line narrow"></div></div><div class="cover sk"></div></li>
+          <li class="archive-row sk-row"><div class="info"><div class="sk sk-line wide"></div><div class="sk sk-line narrow"></div></div><div class="cover sk"></div></li>
+          <li class="archive-row sk-row"><div class="info"><div class="sk sk-line wide"></div><div class="sk sk-line narrow"></div></div><div class="cover sk"></div></li>
+          <li class="archive-row sk-row"><div class="info"><div class="sk sk-line wide"></div><div class="sk sk-line narrow"></div></div><div class="cover sk"></div></li>
+          <li class="archive-row sk-row"><div class="info"><div class="sk sk-line wide"></div><div class="sk sk-line narrow"></div></div><div class="cover sk"></div></li>
+        </ul>
       </div>
     </section>
   </div>

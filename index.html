@@ -6,6 +6,7 @@
     1. Nav          — sticky global navigation (base.css)
     2. Hero         — headline, subtext, hero image, stats bar, CTAs
     3. Articles     — three featured article cards
+    3b. Testimonials — scrolling student quotes
     4. Resources    — link to live STEM resource database
     5. Events       — upcoming event listings
     6. Mission      — mission statement + chapter/opportunity links
@@ -88,7 +89,7 @@
        UNIVERSITY MARQUEE
   ═══════════════════════════════════ -->
   <section class="marquee-section">
-    <p class="marquee-label">Our Students Get Accepted To...</p>
+    <p class="marquee-label">Our Students Go To...</p>
     <div class="marquee">
       <div class="marquee-track" id="marqueeTrack"></div>
     </div>
@@ -139,8 +140,223 @@
   <hr class="section-divider" />
 
   <!-- ═══════════════════════════════════
-       RESOURCES & UPCOMING EVENTS
+       STUDENT TESTIMONIALS
   ═══════════════════════════════════ -->
+  <section class="testimonials-section" aria-labelledby="testimonials-heading">
+    <div class="container tm-reveal">
+
+      <div class="tm-header">
+        <h2 id="testimonials-heading">What our students say</h2>
+        <p>Hear how UrbanBEARS has shaped students across the U.S. and the world.</p>
+      </div>
+
+      <div class="testimonials-cols" role="region" aria-label="Scrolling Testimonials">
+          <div class="tm-col">
+            <ul class="tm-track">
+            <li class="tm-card" tabindex="0">
+              <blockquote>
+                <p>I joined UrbanBEARS thinking STEM was only for kids with fancy labs at school. Then I looked through a real microscope for the first time and I was hooked!</p>
+                <footer>
+                  <span class="tm-avatar" aria-hidden="true">MR</span>
+                  <div>
+                    <cite>Maya R.</cite>
+                    <span>Chicago, IL</span>
+                  </div>
+                </footer>
+              </blockquote>
+            </li>
+            <li class="tm-card" tabindex="0">
+              <blockquote>
+                <p>My mentor went through my first research abstract with me line by line. That paper ended up being the heart of my application, and I'm heading to Cornell for bioengineering.</p>
+                <footer>
+                  <span class="tm-avatar" aria-hidden="true">DO</span>
+                  <div>
+                    <cite>Daniel O.</cite>
+                    <span>Nigeria</span>
+                    <span class="tm-tag">Cornell, Bioengineering</span>
+                  </div>
+                </footer>
+              </blockquote>
+            </li>
+            <li class="tm-card" tabindex="0">
+              <blockquote>
+                <p>I never met a scientist who looked like me until my mentor. She helped me turn my curiosity about prosthetics into an actual project. Now I know what I want to do!</p>
+                <footer>
+                  <span class="tm-avatar" aria-hidden="true">SM</span>
+                  <div>
+                    <cite>Sofia M.</cite>
+                    <span>Mexico</span>
+                  </div>
+                </footer>
+              </blockquote>
+            </li>
+            <li class="tm-card" tabindex="0">
+              <blockquote>
+                <p>The CRISPR workshop was the first time biology felt like building something. I wrote my Columbia essay about it and got in for biomedical engineering.</p>
+                <footer>
+                  <span class="tm-avatar" aria-hidden="true">JT</span>
+                  <div>
+                    <cite>Jamal T.</cite>
+                    <span>Brooklyn, NY</span>
+                    <span class="tm-tag">Columbia, Biomedical Engineering</span>
+                  </div>
+                </footer>
+              </blockquote>
+            </li>
+            <li class="tm-card" tabindex="0">
+              <blockquote>
+                <p>Honestly the best part was the people. Everyone is so welcoming, and every session felt like hanging out with friends who happen to love science.</p>
+                <footer>
+                  <span class="tm-avatar" aria-hidden="true">PS</span>
+                  <div>
+                    <cite>Priya S.</cite>
+                    <span>Houston, TX</span>
+                  </div>
+                </footer>
+              </blockquote>
+            </li>
+            </ul>
+          </div>
+          <div class="tm-col tm-col-md">
+            <ul class="tm-track">
+            <li class="tm-card" tabindex="0">
+              <blockquote>
+                <p>Our school had no lab equipment before UrbanBEARS. Now we run hands-on sessions every week and everyone shows up. I'm studying chemical engineering at MIT next year!</p>
+                <footer>
+                  <span class="tm-avatar" aria-hidden="true">LF</span>
+                  <div>
+                    <cite>Lucas F.</cite>
+                    <span>Brazil</span>
+                    <span class="tm-tag">MIT, Chemical Engineering</span>
+                  </div>
+                </footer>
+              </blockquote>
+            </li>
+            <li class="tm-card" tabindex="0">
+              <blockquote>
+                <p>I was so nervous to ask questions at first, but my mentor made it easy. Now I email her about everything, even stuff that has nothing to do with science.</p>
+                <footer>
+                  <span class="tm-avatar" aria-hidden="true">AB</span>
+                  <div>
+                    <cite>Aaliyah B.</cite>
+                    <span>Atlanta, GA</span>
+                  </div>
+                </footer>
+              </blockquote>
+            </li>
+            <li class="tm-card" tabindex="0">
+              <blockquote>
+                <p>I found UrbanBEARS on the resources page and ended up leading a chapter. Teaching workshops showed me I love building medical devices.</p>
+                <footer>
+                  <span class="tm-avatar" aria-hidden="true">WL</span>
+                  <div>
+                    <cite>Wei L.</cite>
+                    <span>Canada</span>
+                  </div>
+                </footer>
+              </blockquote>
+            </li>
+            <li class="tm-card" tabindex="0">
+              <blockquote>
+                <p>I'd never read a scientific paper before this program. Last month I presented my own research at a symposium. Still can't believe it!</p>
+                <footer>
+                  <span class="tm-avatar" aria-hidden="true">CV</span>
+                  <div>
+                    <cite>Camila V.</cite>
+                    <span>Los Angeles, CA</span>
+                  </div>
+                </footer>
+              </blockquote>
+            </li>
+            <li class="tm-card" tabindex="0">
+              <blockquote>
+                <p>Writing an article for the site was way more fun than I expected. My friends keep sending it around, and my mom has read it about ten times.</p>
+                <footer>
+                  <span class="tm-avatar" aria-hidden="true">EK</span>
+                  <div>
+                    <cite>Ethan K.</cite>
+                    <span>Seattle, WA</span>
+                  </div>
+                </footer>
+              </blockquote>
+            </li>
+            </ul>
+          </div>
+          <div class="tm-col tm-col-lg">
+            <ul class="tm-track">
+            <li class="tm-card" tabindex="0">
+              <blockquote>
+                <p>The mentorship program gave me a plan. I learned how to find research programs and apply to them, and I'm now going to Princeton to study molecular biology.</p>
+                <footer>
+                  <span class="tm-avatar" aria-hidden="true">AD</span>
+                  <div>
+                    <cite>Amara D.</cite>
+                    <span>Ghana</span>
+                    <span class="tm-tag">Princeton, Molecular Biology</span>
+                  </div>
+                </footer>
+              </blockquote>
+            </li>
+            <li class="tm-card" tabindex="0">
+              <blockquote>
+                <p>The first time we dissected a heart in a workshop I was grossed out and amazed at the same time. Best Saturday ever!</p>
+                <footer>
+                  <span class="tm-avatar" aria-hidden="true">TW</span>
+                  <div>
+                    <cite>Tyler W.</cite>
+                    <span>Detroit, MI</span>
+                  </div>
+                </footer>
+              </blockquote>
+            </li>
+            <li class="tm-card" tabindex="0">
+              <blockquote>
+                <p>I used to think science was just memorizing facts. UrbanBEARS showed me it's about asking weird questions and then finding out the answer. I love it now.</p>
+                <footer>
+                  <span class="tm-avatar" aria-hidden="true">NH</span>
+                  <div>
+                    <cite>Nadia H.</cite>
+                    <span>India</span>
+                  </div>
+                </footer>
+              </blockquote>
+            </li>
+            <li class="tm-card" tabindex="0">
+              <blockquote>
+                <p>Our chapter meetings are the highlight of my week. We laugh a lot, build stuff, and somehow learn a ton while doing it.</p>
+                <footer>
+                  <span class="tm-avatar" aria-hidden="true">MJ</span>
+                  <div>
+                    <cite>Marcus J.</cite>
+                    <span>Philadelphia, PA</span>
+                  </div>
+                </footer>
+              </blockquote>
+            </li>
+            <li class="tm-card" tabindex="0">
+              <blockquote>
+                <p>UrbanBEARS pushed me to apply for a summer research program, and I got in! A year ago I didn't even know those existed.</p>
+                <footer>
+                  <span class="tm-avatar" aria-hidden="true">IC</span>
+                  <div>
+                    <cite>Isabella C.</cite>
+                    <span>Miami, FL</span>
+                  </div>
+                </footer>
+              </blockquote>
+            </li>
+            </ul>
+          </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DISABLED FOR NOW: resources and upcoming events
+  <hr class="section-divider" />
+
+  ═══════════════════════════════════
+       RESOURCES & UPCOMING EVENTS
+  ═══════════════════════════════════
   <section class="res-events-section">
     <div class="container">
 
@@ -172,6 +388,7 @@
       </div>
     </div>
   </section>
+  -->
 
   <!-- ═══════════════════════════════════
        MISSION STATEMENT
@@ -269,22 +486,24 @@
   </div>
 
   <script>
-    /* University marquee: two rows, each holding its half of the list four
+    /* University and biomedical lab marquee: two rows, each holding its half of the list four
        times so the -50% loop seam is invisible and the row spans the viewport. */
     (function () {
       var UNIVERSITIES = [
-        { name: 'Harvard',   file: 'harvard',   alt: 'Harvard University' },
-        { name: 'Yale',      file: 'yale',      alt: 'Yale University' },
-        { name: 'Princeton', file: 'princeton', alt: 'Princeton University' },
-        { name: 'Stanford',  file: 'stanford',  alt: 'Stanford University' },
-        { name: 'MIT',       file: 'mit',       alt: 'Massachusetts Institute of Technology' },
-        { name: 'Columbia',  file: 'columbia',  alt: 'Columbia University' },
-        { name: 'Penn',      file: 'upenn',     alt: 'University of Pennsylvania' },
-        { name: 'Caltech',   file: 'caltech',   alt: 'California Institute of Technology' },
-        { name: 'Cornell',   file: 'cornell',   alt: 'Cornell University' },
-        { name: 'Brown',     file: 'brown',     alt: 'Brown University' },
-        { name: 'UChicago',  file: 'uchicago',  alt: 'University of Chicago' },
-        { name: 'Duke',      file: 'duke',      alt: 'Duke University' }
+        { name: 'Harvard',   file: 'universities/harvard',   alt: 'Harvard University' },
+        { file: 'labs/johnson-and-johnson', alt: 'Johnson & Johnson', wide: true },
+        { name: 'MIT',       file: 'universities/mit',       alt: 'Massachusetts Institute of Technology' },
+        { file: 'labs/pfizer', alt: 'Pfizer', wide: true },
+        { name: 'Penn',      file: 'universities/upenn',     alt: 'University of Pennsylvania' },
+        { name: 'Mayo Clinic', file: 'labs/mayo-clinic',     alt: 'Mayo Clinic' },
+        { name: 'NYU',       file: 'universities/nyu',       alt: 'New York University' },
+        { name: 'Columbia',  file: 'universities/columbia',  alt: 'Columbia University' },
+        { file: 'labs/moderna', alt: 'Moderna', wide: true },
+        { name: 'Cornell',   file: 'universities/cornell',   alt: 'Cornell University' },
+        { file: 'labs/genentech', alt: 'Genentech', wide: true },
+        { name: 'Duke',      file: 'universities/duke',      alt: 'Duke University' },
+        { name: 'NIH',       file: 'labs/nih',               alt: 'National Institutes of Health' },
+        { file: 'labs/medtronic', alt: 'Medtronic', wide: true }
       ];
 
       var track  = document.getElementById('marqueeTrack');
@@ -293,8 +512,8 @@
       function render(list) {
         return list.map(function (u) {
           return '<div class="uni">' +
-            '<span class="uni-chip"><img src="assets/images/universities/' + u.file + '.png" alt="' + u.alt + '" width="40" height="40" /></span>' +
-            '<span class="uni-name">' + u.name + '</span>' +
+            '<span class="uni-chip' + (u.wide ? ' wide' : '') + '"><img src="assets/images/' + u.file + '.png" alt="' + u.alt + '" height="40" /></span>' +
+            (u.name ? '<span class="uni-name">' + u.name + '</span>' : '') +
           '</div>';
         }).join('');
       }
@@ -305,6 +524,30 @@
 
       track.innerHTML  = rowA + rowA;
       track2.innerHTML = rowB + rowB;
+    })();
+  </script>
+
+  <script>
+    // Duplicate each testimonial column once so the -50% scroll loops seamlessly.
+    // The copy is hidden from assistive tech and the tab order.
+    document.querySelectorAll('.tm-track').forEach(function (track) {
+      Array.from(track.children).forEach(function (card) {
+        var clone = card.cloneNode(true);
+        clone.setAttribute('aria-hidden', 'true');
+        clone.tabIndex = -1;
+        track.appendChild(clone);
+      });
+    });
+
+    // Fade/slide the section in once when 15% of it is visible.
+    (function () {
+      var el = document.querySelector('.tm-reveal');
+      if (!el) return;
+      new IntersectionObserver(function (entries, obs) {
+        if (!entries[0].isIntersecting) return;
+        el.classList.add('in');
+        obs.disconnect();
+      }, { threshold: 0.15 }).observe(el);
     })();
   </script>
 

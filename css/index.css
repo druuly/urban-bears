@@ -4,6 +4,7 @@
  * Styles specific to index.html. Covers four sections unique to the home page:
  *   1. Hero — two-column layout with star decorations, heading, and stat bar
  *   2. Featured Articles — 3-column article card grid
+ *      Student Testimonials — vertically scrolling quote columns
  *   3. Resources & Upcoming Events — two-column card grid
  *   4. Mission Statement — two-column text + nav-button layout
  *
@@ -179,6 +180,9 @@
   background: rgba(255,255,255,.95);
 }
 .uni-chip img { width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
+/* Wordmark logos (companies) are wide, so the chip stretches to fit them */
+.uni-chip.wide { width: auto; padding: .25rem .75rem; }
+.uni-chip.wide img { width: auto; max-width: 7rem; }
 .uni-name {
   font-family: 'Libre Baskerville', serif;
   font-size: clamp(1.1rem, 2.2vw, 1.4rem);
@@ -190,6 +194,8 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .marquee-track { animation: none; }
+  .tm-track { animation: none; }
+  .testimonials-cols { overflow-y: auto; }
 }
 
 /* ══════════════════════════════════════════════
@@ -271,6 +277,140 @@ a.article-card {
 .skeleton-line.wide  { width: 85%; }
 .skeleton-line.narrow { width: 52%; margin-top: .4rem; }
 @keyframes shimmer { to { background-position: -200% 0; } }
+
+/* ══════════════════════════════════════════════
+   STUDENT TESTIMONIALS
+   Three columns scrolling vertically at different speeds.
+   JS in index.html duplicates each track so -50% loops cleanly.
+══════════════════════════════════════════════ */
+.testimonials-section {
+  padding-block: 6rem;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Section entrance: fade up from below with a slight tilt */
+.tm-reveal {
+  opacity: 0;
+  transform: translateY(50px) rotate(-2deg);
+  transition: opacity .8s cubic-bezier(.16,1,.3,1),
+              transform 1.2s cubic-bezier(.16,1,.3,1);
+}
+.tm-reveal.in { opacity: 1; transform: none; }
+
+.tm-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 48rem;
+  margin: 0 auto 4.5rem;
+  text-align: center;
+}
+.tm-header h2 {
+  font-family: 'The Seasons', 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(2.2rem, 4.2vw, 3.2rem);
+  font-weight: 800;
+  letter-spacing: -.03em;
+  line-height: 1.05;
+}
+.tm-header p {
+  max-width: 34rem;
+  margin-top: 1.5rem;
+  font-size: clamp(1.15rem, 2vw, 1.4rem);
+  line-height: 1.625;
+}
+
+.testimonials-cols {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 2.5rem;
+  max-height: 740px;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 10%, #000 90%, transparent);
+          mask-image: linear-gradient(to bottom, transparent, #000 10%, #000 90%, transparent);
+}
+
+.tm-track {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding-bottom: 1.5rem;
+  animation: tmScroll 32s linear infinite;
+  will-change: transform;
+}
+.tm-col-md .tm-track { animation-duration: 40s; }
+.tm-col-lg .tm-track { animation-duration: 36s; }
+
+@keyframes tmScroll {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-50%); }
+}
+
+.tm-card {
+  width: 100%;
+  max-width: 20rem;
+  padding: 2.5rem;
+  background: var(--navy-card);
+  border: 1px solid rgba(255,255,255,.22);
+  border-radius: 1.5rem;
+  box-shadow: 0 10px 15px -3px rgba(0,0,0,.25), 0 4px 6px -4px rgba(0,0,0,.25);
+  cursor: default;
+  user-select: none;
+  transition: transform .4s cubic-bezier(.34,1.56,.64,1), box-shadow .3s ease;
+}
+.tm-card:hover,
+.tm-card:focus {
+  transform: translateY(-8px) scale(1.03);
+  box-shadow: 0 25px 50px -12px rgba(0,0,0,.6), 0 10px 10px -5px rgba(0,0,0,.3),
+              0 0 0 1px rgba(255,255,255,.1);
+}
+.tm-card:focus { outline: none; box-shadow: 0 0 0 2px rgba(207,214,245,.5); }
+.tm-card p {
+  line-height: 1.625;
+}
+.tm-card footer {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  margin-top: 1.5rem;
+}
+.tm-avatar {
+  width: 2.5rem;
+  height: 2.5rem;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--lavender-bg);
+  color: var(--text-dark);
+  box-shadow: 0 0 0 2px rgba(255,255,255,.12);
+  font-size: .8rem;
+  font-weight: 700;
+  transition: box-shadow .3s ease-in-out;
+}
+.tm-card:hover .tm-avatar { box-shadow: 0 0 0 2px rgba(207,214,245,.3); }
+.tm-card cite {
+  display: block;
+  font-style: normal;
+  font-weight: 600;
+  letter-spacing: -.025em;
+  line-height: 1.25rem;
+}
+.tm-card footer span:not(.tm-avatar) {
+  display: block;
+  margin-top: .125rem;
+  font-style: normal;
+  font-size: .875rem;
+  letter-spacing: -.025em;
+  line-height: 1.25rem;
+}
+
+/* Second and third columns drop out on narrower screens (md / lg) */
+@media (max-width: 64rem) { .tm-col-lg { display: none; } }
+@media (max-width: 48rem) { .tm-col-md { display: none; } }
 
 /* ══════════════════════════════════════════════
    RESOURCES & UPCOMING EVENTS

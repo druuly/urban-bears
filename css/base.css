@@ -32,6 +32,9 @@
 
 /* ─── Base ─── */
 html { font-size: 16px; scroll-behavior: smooth; }
+* { scrollbar-color: #fff transparent; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #fff; border-radius: 3px; }
 body {
   background: var(--navy);
   color: var(--white);

@@ -84,6 +84,19 @@
     </div>
   </section>
 
+  <!-- ═══════════════════════════════════
+       UNIVERSITY MARQUEE
+  ═══════════════════════════════════ -->
+  <section class="marquee-section">
+    <p class="marquee-label">Our Students Get Accepted To...</p>
+    <div class="marquee">
+      <div class="marquee-track" id="marqueeTrack"></div>
+    </div>
+    <div class="marquee">
+      <div class="marquee-track rev" id="marqueeTrack2"></div>
+    </div>
+  </section>
+
   <hr class="section-divider" />
 
   <!-- ═══════════════════════════════════
@@ -254,6 +267,46 @@
     }
   </style>
   </div>
+
+  <script>
+    /* University marquee: two rows, each holding its half of the list four
+       times so the -50% loop seam is invisible and the row spans the viewport. */
+    (function () {
+      var UNIVERSITIES = [
+        { name: 'Harvard',   file: 'harvard',   alt: 'Harvard University' },
+        { name: 'Yale',      file: 'yale',      alt: 'Yale University' },
+        { name: 'Princeton', file: 'princeton', alt: 'Princeton University' },
+        { name: 'Stanford',  file: 'stanford',  alt: 'Stanford University' },
+        { name: 'MIT',       file: 'mit',       alt: 'Massachusetts Institute of Technology' },
+        { name: 'Columbia',  file: 'columbia',  alt: 'Columbia University' },
+        { name: 'Penn',      file: 'upenn',     alt: 'University of Pennsylvania' },
+        { name: 'Caltech',   file: 'caltech',   alt: 'California Institute of Technology' },
+        { name: 'Cornell',   file: 'cornell',   alt: 'Cornell University' },
+        { name: 'Brown',     file: 'brown',     alt: 'Brown University' },
+        { name: 'UChicago',  file: 'uchicago',  alt: 'University of Chicago' },
+        { name: 'Duke',      file: 'duke',      alt: 'Duke University' }
+      ];
+
+      var track  = document.getElementById('marqueeTrack');
+      var track2 = document.getElementById('marqueeTrack2');
+
+      function render(list) {
+        return list.map(function (u) {
+          return '<div class="uni">' +
+            '<span class="uni-chip"><img src="assets/images/universities/' + u.file + '.png" alt="' + u.alt + '" width="40" height="40" /></span>' +
+            '<span class="uni-name">' + u.name + '</span>' +
+          '</div>';
+        }).join('');
+      }
+
+      var half = Math.ceil(UNIVERSITIES.length / 2);
+      var rowA = render(UNIVERSITIES.slice(0, half)).repeat(2);
+      var rowB = render(UNIVERSITIES.slice(half)).repeat(2);
+
+      track.innerHTML  = rowA + rowA;
+      track2.innerHTML = rowB + rowB;
+    })();
+  </script>
 
   <script>
     (function () {

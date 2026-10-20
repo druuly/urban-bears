@@ -123,6 +123,76 @@
 }
 
 /* ══════════════════════════════════════════════
+   UNIVERSITY MARQUEE
+   Two full-bleed rows running opposite ways.
+══════════════════════════════════════════════ */
+.marquee-section { padding-block: 2rem 3rem; }
+
+.marquee-label {
+  margin-bottom: 1.75rem;
+  text-align: center;
+  font-family: 'The Seasons', 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(1.4rem, 2.6vw, 2rem);
+  font-weight: 700;
+}
+
+.marquee {
+  overflow: hidden;
+  padding-block: .375rem;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 7%, #000 93%, transparent);
+          mask-image: linear-gradient(to right, transparent, #000 7%, #000 93%, transparent);
+}
+.marquee + .marquee { margin-top: 1.75rem; }
+
+.marquee-track {
+  --mq-gap: 4rem;
+  display: flex;
+  width: max-content;
+  gap: var(--mq-gap);
+  animation: marqueeScroll 48s linear infinite;
+  will-change: transform;
+  backface-visibility: hidden;
+}
+.marquee-track.rev { animation-name: marqueeScrollRev; animation-duration: 58s; }
+
+/* -50% lands half a gap short of one full set, so pull back the extra gap/2. */
+@keyframes marqueeScroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(calc(-50% - var(--mq-gap) / 2)); }
+}
+@keyframes marqueeScrollRev {
+  from { transform: translateX(calc(-50% - var(--mq-gap) / 2)); }
+  to   { transform: translateX(0); }
+}
+.marquee:hover .marquee-track { animation-play-state: paused; }
+
+.uni { display: flex; align-items: center; gap: .75rem; white-space: nowrap; user-select: none; }
+.uni-chip {
+  width: 2.5rem;
+  height: 2.5rem;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: .25rem;
+  border-radius: .5rem;
+  background: rgba(255,255,255,.95);
+}
+.uni-chip img { width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
+.uni-name {
+  font-family: 'Libre Baskerville', serif;
+  font-size: clamp(1.1rem, 2.2vw, 1.4rem);
+  font-weight: 700;
+}
+
+@media (max-width: 48rem) {
+  .marquee-track { --mq-gap: 2.5rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track { animation: none; }
+}
+
+/* ══════════════════════════════════════════════
    FEATURED ARTICLES
 ══════════════════════════════════════════════ */
 .articles-section { padding-block: 4rem 5rem; }

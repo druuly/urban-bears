@@ -3,7 +3,7 @@
    should go through this module so the rest of the app stays DOM-only. */
 
 import {
-  collection, doc, getDoc, getDocs, addDoc, deleteDoc,
+  collection, doc, getDoc, getDocs, setDoc, writeBatch, deleteDoc,
   query, orderBy, limit as fbLimit, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 import { app, db } from './firebase.js';
@@ -11,6 +11,7 @@ import { app, db } from './firebase.js';
 export { app, db };
 
 const COLL = 'articles';
+const CARDS = 'articleCards';
 
 /* Bylines come from the subtitle, not the uploader's account.
    Articles are often published on a student's behalf, so `authorName` /
@@ -38,10 +39,56 @@ export async function fetchArticles({ limit = 60 } = {}) {
   return snap.docs.map(d => ({ id: d.id, ...d.data() }));
 }
 
-/* Cross-page cache of the article list so research.html can paint instantly.
-   IndexedDB, not sessionStorage: covers are base64 and blow past its quota.
-   Bodies are dropped (the list never shows them) and Timestamps are stored
-   as millis since structured clone strips their methods. */
+/* List cards: a slim copy of each article (no body, small cover thumbnail,
+   mirrored counters) so the home and research lists don't download every
+   full article. articles/{id} stays the source of truth; the counters are
+   kept in step by article.html. Same id as the article. */
+const THUMB_W = 640;
+
+const makeThumb = (dataUrl) => new Promise((resolve) => {
+  if (!dataUrl) return resolve('');
+  const img = new Image();
+  img.onload = () => {
+    const scale = Math.min(1, THUMB_W / img.width);
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.round(img.width * scale);
+    canvas.height = Math.round(img.height * scale);
+    canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+    resolve(canvas.toDataURL('image/jpeg', 0.7));
+  };
+  img.onerror = () => resolve('');
+  img.src = dataUrl;
+});
+
+const cardFields = async (a) => ({
+  title:        a.title || 'Untitled',
+  subtitle:     a.subtitle || '',
+  tags:         Array.isArray(a.tags) ? a.tags : [],
+  authorUid:    a.authorUid || '',
+  authorName:   a.authorName || 'Anonymous',
+  authorPhoto:  a.authorPhoto || '',
+  authorSchool: a.authorSchool || '',
+  coverUrl:     await makeThumb(a.coverUrl),
+  createdAt:    a.createdAt,
+  likeCount:    a.likeCount || 0,
+  repostCount:  a.repostCount || 0,
+  viewCount:    a.viewCount || 0,
+});
+
+export async function saveCard(id, article) {
+  return setDoc(doc(db, CARDS, id), await cardFields(article));
+}
+
+export async function fetchArticleCards({ limit = 60 } = {}) {
+  const q = query(collection(db, CARDS), orderBy('createdAt', 'desc'), fbLimit(limit));
+  const snap = await getDocs(q);
+  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+}
+
+/* Cross-page cache of the card list so research.html can paint instantly.
+   IndexedDB, not sessionStorage: covers are base64 and can blow past its
+   quota. Timestamps are stored as millis since structured clone strips
+   their methods. */
 const CACHE_DB = 'ub-articles';
 const CACHE_STORE = 'kv';
 const CACHE_KEY = 'list';
@@ -53,15 +100,15 @@ const openCache = () => new Promise((resolve, reject) => {
   req.onerror = () => reject(req.error);
 });
 
+/* Fetches the card list, caches it for research.html, and returns it. */
 export async function prefetchArticles({ limit = 60 } = {}) {
-  const articles = await fetchArticles({ limit });
-  const slim = articles.map(({ body, ...a }) => ({
-    ...a,
-    createdAt: a.createdAt?.toMillis?.() ?? a.createdAt,
-    updatedAt: a.updatedAt?.toMillis?.() ?? a.updatedAt,
-  }));
-  const cache = await openCache();
-  cache.transaction(CACHE_STORE, 'readwrite').objectStore(CACHE_STORE).put(slim, CACHE_KEY);
+  const cards = await fetchArticleCards({ limit });
+  try {
+    const slim = cards.map(a => ({ ...a, createdAt: a.createdAt?.toMillis?.() ?? a.createdAt }));
+    const cache = await openCache();
+    cache.transaction(CACHE_STORE, 'readwrite').objectStore(CACHE_STORE).put(slim, CACHE_KEY);
+  } catch { /* IndexedDB unavailable: the list still renders */ }
+  return cards;
 }
 
 export async function getCachedArticles() {
@@ -83,7 +130,7 @@ export async function getArticle(id) {
 }
 
 export async function publishArticle(data) {
-  const ref = await addDoc(collection(db, COLL), {
+  const article = {
     title:        data.title || 'Untitled',
     subtitle:     data.subtitle || '',
     body:         data.body || '',
@@ -98,7 +145,12 @@ export async function publishArticle(data) {
     likeCount:    0,
     repostCount:  0,
     viewCount:    0,
-  });
+  };
+  const ref = doc(collection(db, COLL));
+  const batch = writeBatch(db);
+  batch.set(ref, article);
+  batch.set(doc(db, CARDS, ref.id), await cardFields(article));
+  await batch.commit();
   return ref.id;
 }
 
@@ -107,10 +159,10 @@ export async function deleteArticle(id) {
 }
 
 /* Returns up to `count` featured articles ranked by engagement (likes + views),
-   pulling from the `pool` most recent articles as candidates. */
-export async function fetchFeaturedArticles({ count = 3, pool = 20 } = {}) {
-  const articles = await fetchArticles({ limit: pool });
+   picking from the `pool` most recent of an already-fetched card list. */
+export function pickFeaturedArticles(articles, { count = 3, pool = 20 } = {}) {
   return articles
+    .slice(0, pool)
     .sort((a, b) =>
       ((b.likeCount || 0) + (b.viewCount || 0)) -
       ((a.likeCount || 0) + (a.viewCount || 0))

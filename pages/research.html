@@ -1495,7 +1495,12 @@
     import { doc, getDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
     import { app, auth, signIn, signOut, signInErrorMessage } from '/js/firebase.js';
     import { checkAndShowProfileModal } from '/js/profile-modal.js';
-    import { db, fetchArticles, getCachedArticles, publishArticle, articleAuthorName, articleAuthorSchool } from '/js/articles.js';
+    import { db, fetchArticleCards, getCachedArticles, publishArticle, articleAuthorName, articleAuthorSchool } from '/js/articles.js';
+
+    /* Start the list fetch now so it doesn't wait on the components below;
+       loadArticles() picks it up on its first call. */
+    let earlyFetch = fetchArticleCards({ limit: 60 });
+    earlyFetch.catch(() => {});
 
     /* Shared components (nav, footer, profile modal) must be in the DOM
        before any code below queries it. */
@@ -1767,6 +1772,8 @@
 
     const loadArticles = async () => {
       // Paint the list index.html prefetched, then replace it with fresh data.
+      const pending = earlyFetch || fetchArticleCards({ limit: 60 });
+      earlyFetch = null;
       let cached = [];
       if (!state.articles.length) {
         cached = await getCachedArticles();
@@ -1776,7 +1783,7 @@
         }
       }
       try {
-        state.articles = await fetchArticles({ limit: 60 });
+        state.articles = await pending;
       } catch (e) {
         console.error('load articles failed', e);
         if (!cached.length) state.articles = [];

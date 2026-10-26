@@ -121,6 +121,25 @@ Without those passes a single pasted photo can exceed the 1 MiB cap on
 its own and the write fails with
 `FirebaseError: The value of property "body" is longer than 1048487 bytes`.
 
+## articleCards/{articleId}
+
+Slim copy of each article for the home and research lists. Same id as the
+article. Exists because Firestore always returns whole documents: listing
+`articles` meant downloading every body and full-size cover just to draw
+cards.
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| `title`, `subtitle`, `tags` | string, string, string[] | Copied from the article. |
+| `authorUid`, `authorName`, `authorPhoto`, `authorSchool` | string | Copied from the article. |
+| `coverUrl` | string | Empty or a JPEG data URL downscaled to 640 px wide (quality 0.7). |
+| `createdAt` | Timestamp | Same value as the article's. |
+| `likeCount`, `repostCount`, `viewCount` | number | Mirrors of the article counters. `article.html` writes both docs on every like, repost and view; the article doc stays the source of truth. |
+
+Written by `publishArticle()` in a batch with the article, and deleted
+with it in `article.html`. `saveCard(id, article)` in `js/articles.js`
+rebuilds one card from a full article (used for the one-time backfill).
+
 ## articles/{id}/likes/{uid}
 
 Existence = "this user has liked this article". One doc per user per
@@ -157,6 +176,8 @@ articles/{id}         read: anyone;
                       delete: own article;
 articles/{id}/likes/{uid}   read: anyone; write: same uid only
 articles/{id}/reposts/{uid} read: anyone; write: same uid only
+articleCards/{id}     read: anyone; create: authors;
+                      update/delete: same rules as articles/{id};
 ```
 
 The "diff only affects counter fields" clause is what lets readers
@@ -168,7 +189,7 @@ or the increment write will be denied.
 
 | Where | Query |
 | --- | --- |
-| `loadArticles` | `query(articles, orderBy('createdAt','desc'), limit(60))` — single fetch, sorted, capped at 60. Powers both home and archive after client-side reshuffle. |
+| `loadArticles` | `query(articleCards, orderBy('createdAt','desc'), limit(60))` — single fetch, sorted, capped at 60. Powers both home and archive after client-side reshuffle. |
 | `openReader` | `onSnapshot(doc(articles, id))` — live binding for engagement counters while a reader is open. |
 | Engagement toggle | `getDoc` → `deleteDoc`/`setDoc` on the `likes`/`reposts` subdoc, then `updateDoc` with `increment(±1)` on the parent. |
 | Analytics dashboard | `query(events, orderBy('createdAt','desc'), limit(5000))`, with an optional `where('createdAt','>=',since)` when a window is requested — one fetch, aggregated in memory for both the site-wide numbers and each article, so no composite index is needed. Plus `getDocs(users)` and the usual article list. |

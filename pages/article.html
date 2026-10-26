@@ -674,6 +674,12 @@
       } catch (e) {}
     };
 
+    /* The research and home lists read counters from articleCards, so mirror
+       each counter write there. Best-effort: the article doc is the source of truth. */
+    const updateCard = (id, data) =>
+      updateDoc(doc(db, 'articleCards', id), data)
+        .catch((e) => console.warn('card counter not updated', e?.code || e));
+
     const toggleEngagement = async (type) => {
       if (!state.user) { showToast('Sign in to interact'); return; }
       const id = state.articleId;
@@ -706,6 +712,7 @@
         if (wasActive) await deleteDoc(subRef);
         else await setDoc(subRef, { createdAt: serverTimestamp() });
         await updateDoc(doc(db, 'articles', id), { [countField]: increment(delta) });
+        updateCard(id, { [countField]: increment(delta) });
         logEvent(
           type === 'like'
             ? (wasActive ? 'unlike' : 'like')
@@ -763,6 +770,7 @@
       const ok = await showConfirm();
       if (!ok) return;
       try {
+        await deleteDoc(doc(db, 'articleCards', state.articleId));
         await deleteDoc(doc(db, 'articles', state.articleId));
         showToast('Article deleted');
         setTimeout(() => { location.href = 'research.html'; }, 800);
@@ -796,6 +804,7 @@
 
       updateDoc(doc(db, 'articles', state.articleId), { viewCount: increment(1) })
         .catch((e) => console.warn('view count not recorded', e?.code || e));
+      updateCard(state.articleId, { viewCount: increment(1) });
       logEvent('view', state.articleId);
     };
 

@@ -1495,7 +1495,7 @@
     import { doc, getDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
     import { app, auth, signIn, signOut, signInErrorMessage } from '/js/firebase.js';
     import { checkAndShowProfileModal } from '/js/profile-modal.js';
-    import { db, fetchArticles, publishArticle, articleAuthorName, articleAuthorSchool } from '/js/articles.js';
+    import { db, fetchArticles, getCachedArticles, publishArticle, articleAuthorName, articleAuthorSchool } from '/js/articles.js';
 
     /* Shared components (nav, footer, profile modal) must be in the DOM
        before any code below queries it. */
@@ -1758,17 +1758,30 @@
     /* ════════════════════════════════════════════════════════
        FETCH ARTICLES
     ════════════════════════════════════════════════════════ */
-    const loadArticles = async () => {
-      try {
-        state.articles = await fetchArticles({ limit: 60 });
-      } catch (e) {
-        console.error('load articles failed', e);
-        state.articles = [];
-      }
+    const renderAll = () => {
       renderHome();
       renderArchive();
       renderTagChips();
       renderDrafts();
+    };
+
+    const loadArticles = async () => {
+      // Paint the list index.html prefetched, then replace it with fresh data.
+      let cached = [];
+      if (!state.articles.length) {
+        cached = await getCachedArticles();
+        if (cached.length) {
+          state.articles = cached;
+          renderAll();
+        }
+      }
+      try {
+        state.articles = await fetchArticles({ limit: 60 });
+      } catch (e) {
+        console.error('load articles failed', e);
+        if (!cached.length) state.articles = [];
+      }
+      renderAll();
     };
 
     /* ════════════════════════════════════════════════════════

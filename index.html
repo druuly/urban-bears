@@ -655,6 +655,11 @@
         }).join('');
       } catch (e) {
         console.error('Featured articles failed to load', e);
+      } finally {
+        // Warm the cache research.html reads from so its articles show instantly
+        (window.requestIdleCallback || setTimeout)(() => {
+          import('/js/articles.js').then(m => m.prefetchArticles()).catch(() => {});
+        });
       }
     })();
   </script>

@@ -38,6 +38,45 @@ export async function fetchArticles({ limit = 60 } = {}) {
   return snap.docs.map(d => ({ id: d.id, ...d.data() }));
 }
 
+/* Cross-page cache of the article list so research.html can paint instantly.
+   IndexedDB, not sessionStorage: covers are base64 and blow past its quota.
+   Bodies are dropped (the list never shows them) and Timestamps are stored
+   as millis since structured clone strips their methods. */
+const CACHE_DB = 'ub-articles';
+const CACHE_STORE = 'kv';
+const CACHE_KEY = 'list';
+
+const openCache = () => new Promise((resolve, reject) => {
+  const req = indexedDB.open(CACHE_DB, 1);
+  req.onupgradeneeded = () => req.result.createObjectStore(CACHE_STORE);
+  req.onsuccess = () => resolve(req.result);
+  req.onerror = () => reject(req.error);
+});
+
+export async function prefetchArticles({ limit = 60 } = {}) {
+  const articles = await fetchArticles({ limit });
+  const slim = articles.map(({ body, ...a }) => ({
+    ...a,
+    createdAt: a.createdAt?.toMillis?.() ?? a.createdAt,
+    updatedAt: a.updatedAt?.toMillis?.() ?? a.updatedAt,
+  }));
+  const cache = await openCache();
+  cache.transaction(CACHE_STORE, 'readwrite').objectStore(CACHE_STORE).put(slim, CACHE_KEY);
+}
+
+export async function getCachedArticles() {
+  try {
+    const cache = await openCache();
+    return await new Promise((resolve, reject) => {
+      const req = cache.transaction(CACHE_STORE).objectStore(CACHE_STORE).get(CACHE_KEY);
+      req.onsuccess = () => resolve(req.result || []);
+      req.onerror = () => reject(req.error);
+    });
+  } catch {
+    return [];
+  }
+}
+
 export async function getArticle(id) {
   const snap = await getDoc(doc(db, COLL, id));
   return snap.exists() ? { id: snap.id, ...snap.data() } : null;

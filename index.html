@@ -82,8 +82,8 @@
 
         <!-- Text content -->
         <div class="hero-content">
-          <h1 class="hero-heading">Inspiring the next generation of biomedical engineers and scientists</h1>
-          <p class="hero-sub">We help students navigate science literacy and spread innovation</p>
+          <h1 class="hero-heading">Leading over <span class="hero-count" id="heroCount">300,000</span> future biomedical engineers and researchers</h1>
+          <p class="hero-sub">We help the underrepresented youth navigate science literacy and spread innovation</p>
         </div>
 
         <div class="hero-visual">
@@ -509,24 +509,38 @@
   </div>
 
   <script>
-    /* University and biomedical lab marquee: two rows, each holding its half of the list four
+    // Count the hero number up from 100 to 300,000 (ease-out). Reduced motion keeps the final value.
+    (function () {
+      var el = document.getElementById('heroCount');
+      if (!el || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      var FROM = 100, TO = 300000, DURATION = 3500, start = null;
+      function tick(now) {
+        if (start === null) start = now;
+        var t = Math.min((now - start) / DURATION, 1);
+        el.textContent = Math.round(FROM + (TO - FROM) * (1 - Math.pow(1 - t, 3))).toLocaleString('en-US');
+        if (t < 1) requestAnimationFrame(tick);
+      }
+      el.textContent = FROM;
+      requestAnimationFrame(tick);
+    })();
+  </script>
+
+  <script>
+    /* University and organization marquee: two rows, each holding its half of the list four
        times so the -50% loop seam is invisible and the row spans the viewport. */
     (function () {
       var UNIVERSITIES = [
-        { name: 'Harvard',   file: 'universities/harvard',   alt: 'Harvard University' },
-        { file: 'labs/johnson-and-johnson', alt: 'Johnson & Johnson', wide: true },
-        { name: 'MIT',       file: 'universities/mit',       alt: 'Massachusetts Institute of Technology' },
-        { file: 'labs/pfizer', alt: 'Pfizer', wide: true },
-        { name: 'Penn',      file: 'universities/upenn',     alt: 'University of Pennsylvania' },
-        { name: 'Mayo Clinic', file: 'labs/mayo-clinic',     alt: 'Mayo Clinic' },
-        { name: 'NYU',       file: 'universities/nyu',       alt: 'New York University' },
+        { name: 'UN',        file: 'orgs/un',                alt: 'United Nations' },
         { name: 'Columbia',  file: 'universities/columbia',  alt: 'Columbia University' },
-        { file: 'labs/moderna', alt: 'Moderna', wide: true },
-        { name: 'Cornell',   file: 'universities/cornell',   alt: 'Cornell University' },
-        { file: 'labs/genentech', alt: 'Genentech', wide: true },
+        { name: 'MIT',       file: 'universities/mit',       alt: 'Massachusetts Institute of Technology' },
+        { name: 'NYU',       file: 'universities/nyu',       alt: 'New York University' },
+        { name: 'Rice',      file: 'universities/rice',      alt: 'Rice University' },
         { name: 'Duke',      file: 'universities/duke',      alt: 'Duke University' },
-        { name: 'NIH',       file: 'labs/nih',               alt: 'National Institutes of Health' },
-        { file: 'labs/medtronic', alt: 'Medtronic', wide: true }
+        { name: 'USC',       file: 'universities/usc',       alt: 'University of Southern California' },
+        { name: 'UNESCO',    file: 'orgs/unesco',            alt: 'UNESCO' },
+        { name: 'UN Youth Office', file: 'orgs/un',          alt: 'UN Youth Office' },
+        { name: 'NASA',     file: 'orgs/nasa',              alt: 'NASA' },
+        { file: 'labs/johnson-and-johnson', alt: 'Johnson & Johnson', wide: true }
       ];
 
       var track  = document.getElementById('marqueeTrack');
